@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+	<!-- Colin Peter cypeter@ucsc.edu -->
+	<!-- Nikita Sokolnikov nsokolni@ucsc.edu -->
+	<!-- 5/17/2015 -->
+	<!-- Final Project -->
+	<!-- Creates a manipulable scene with shadow volumes and reflections -->
+	<head>
+		<title>CMPS160 Final Project</title>
+		<meta charset="UTF-8">
+	</head>
+	<body onload=load()>
+		<table>
+			<tr>
+				<td>
+					<canvas id="canvas">HTML5 canvas disabled or not supported.</canvas>
+					<!-- canvas id="testcanvas">HTML5 canvas disabled or not supported.</canvas -->
+				</td>
+				<td valign="top">
+					<button onclick=setmode("transx")>translate x</button><br>
+					<button onclick=setmode("transy")>translate y</button><br>
+					<button onclick=setmode("transz")>translate z</button><br>
+					<button onclick=setmode("transxy")>translate xy</button><br>
+					<button onclick=setmode("transyz")>translate yz</button><br>
+					<button onclick=setmode("transxz")>translate xz</button><br>
+					<button onclick=setmode("transscreen")>screen translate</button><br>
+					<br>
+					<button onclick=setmode("scale")>scale</button><br>
+					<br>
+					<button onclick=setmode("rotx")>rotate x</button><br>
+					<button onclick=setmode("roty")>rotate y</button><br>
+					<button onclick=setmode("rotz")>rotate z</button><br>
+					<button onclick=setmode("rotscreen")>screen rotate</button><br>
+					<br>
+					<button onclick=setmode("tumble")>tumble</button><br>
+				</td>
+			</tr>
+		</table>
+		<!-- table>
+			<tr>
+				<td><input type="text" id="testmin"></td>
+				<td><input type="text" id="testmax"></td>
+				<td><input type="text" id="testtime"></td>
+			</tr>
+			<tr>
+				<td><button onclick=setTestMin()>min</button></td>
+				<td><button onclick=setTestMax()>max</button></td>
+				<td><button onclick=setTestTime()>time</button></td>
+			</tr>
+		</table -->
+		<script src="thegoodstuff.js"></script>
+	</body>
+</html>
