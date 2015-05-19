@@ -6,7 +6,7 @@
 var orig_pos = null;
 
 //mode functions for all the different tools
-//lots of irritating math here that I have no desire to comment the details of
+//lots of irritating math here that I have no desire to comment the details of.
 //the gist of these is that you project the place the user clicked onto a plane 
 //which is oriented so that the result point can be compared with an original
 //result point and a scalar can be computed depending on their relative positions
@@ -17,7 +17,7 @@ var transx_begin = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 1, y: 0, z: 0};
@@ -28,13 +28,13 @@ var transx_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).x;
 	
 	transx_update(canvas_x, canvas_y);
-}
+};
 var transx_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 1, y: 0, z: 0};
@@ -57,13 +57,13 @@ var transx_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									-diff, 0, 0, 1]
 						};
-}
+};
 var transy_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 1, z: 0};
@@ -74,13 +74,13 @@ var transy_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).y;
 	
 	transy_update(canvas_x, canvas_y);
-}
+};
 var transy_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 1, z: 0};
@@ -103,13 +103,13 @@ var transy_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									0, -diff, 0, 1]
 						};
-}
+};
 var transz_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 0, z: 1};
@@ -120,13 +120,13 @@ var transz_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).z;
 	
 	transz_update(canvas_x, canvas_y);
-}
+};
 var transz_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 0, z: 1};
@@ -149,14 +149,14 @@ var transz_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									0, 0, -diff, 1]
 						};
-}
+};
 
 var transxy_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 0, z: 1};
@@ -166,13 +166,13 @@ var transxy_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
 	
 	transxy_update(canvas_x, canvas_y);
-}
+};
 var transxy_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 0, z: 1};
@@ -194,14 +194,14 @@ var transxy_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									-diff.x, -diff.y, 0, 1]
 						};
-}
+};
 
 var transyz_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 1, y: 0, z: 0};
@@ -211,13 +211,13 @@ var transyz_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
 	
 	transyz_update(canvas_x, canvas_y);
-}
+};
 var transyz_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 1, y: 0, z: 0};
@@ -239,14 +239,14 @@ var transyz_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									0, -diff.y, -diff.z, 1]
 						};
-}
+};
 
 var transxz_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 1, z: 0};
@@ -256,13 +256,13 @@ var transxz_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
 	
 	transxz_update(canvas_x, canvas_y);
-}
+};
 var transxz_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = {x: 0, y: 1, z: 0};
@@ -284,14 +284,14 @@ var transxz_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									-diff.x, 0, -diff.z, 1]
 						};
-}
+};
 
 var screen_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = camdir;
@@ -301,13 +301,13 @@ var screen_begin = function(canvas_x, canvas_y) {
 	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
 	
 	screen_update(canvas_x, canvas_y);
-}
+};
 var screen_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	
 	var norm = camdir;
@@ -329,7 +329,7 @@ var screen_update = function(canvas_x, canvas_y) {
 									0, 0, 1, 0,
 									-diff.x, -diff.y, -diff.z, 1]
 						};
-}
+};
 
 
 
@@ -341,7 +341,7 @@ var scale_begin = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -356,13 +356,13 @@ var scale_begin = function(canvas_x, canvas_y) {
 	//console.log(orig_pos*180/Math.PI);
 	
 	scale_update(canvas_x, canvas_y);
-}
+};
 var scale_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -403,8 +403,8 @@ var scale_update = function(canvas_x, canvas_y) {
 												0, 1, 0, 0,
 												0, 0, 1, 0,
 												obj_pos.x, obj_pos.y, obj_pos.z, 1])
-	}
-}
+	};
+};
 
 
 
@@ -417,7 +417,7 @@ var rotx_begin = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -430,13 +430,13 @@ var rotx_begin = function(canvas_x, canvas_y) {
 	//console.log(orig_pos*180/Math.PI);
 	
 	rotx_update(canvas_x, canvas_y);
-}
+};
 var rotx_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -451,14 +451,14 @@ var rotx_update = function(canvas_x, canvas_y) {
 						forwards: createRotPointX(obj_pos.x, obj_pos.y, obj_pos.z, theta),
 						reverse: createRotPointX(obj_pos.x, obj_pos.y, obj_pos.z, -theta)
 						};
-}
+};
 
 var roty_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -471,13 +471,13 @@ var roty_begin = function(canvas_x, canvas_y) {
 	//console.log(orig_pos*180/Math.PI);
 	
 	roty_update(canvas_x, canvas_y);
-}
+};
 var roty_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -492,14 +492,14 @@ var roty_update = function(canvas_x, canvas_y) {
 						forwards: createRotPointY(obj_pos.x, obj_pos.y, obj_pos.z, theta),
 						reverse: createRotPointY(obj_pos.x, obj_pos.y, obj_pos.z, -theta)
 						};
-}
+};
 
 var rotz_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -512,13 +512,13 @@ var rotz_begin = function(canvas_x, canvas_y) {
 	//console.log(orig_pos*180/Math.PI);
 	
 	rotz_update(canvas_x, canvas_y);
-}
+};
 var rotz_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, obj_transforms[current_object].forwards);
+	pos = mult(pos, objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	var obj_pos = pos;
 	
@@ -533,7 +533,7 @@ var rotz_update = function(canvas_x, canvas_y) {
 						forwards: createRotPointZ(obj_pos.x, obj_pos.y, obj_pos.z, theta),
 						reverse: createRotPointZ(obj_pos.x, obj_pos.y, obj_pos.z, -theta)
 						};
-}
+};
 
 var orig_axis;
 var screenrot_begin = function(canvas_x, canvas_y) {
@@ -541,7 +541,7 @@ var screenrot_begin = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(obj_transforms[current_object].forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -556,13 +556,13 @@ var screenrot_begin = function(canvas_x, canvas_y) {
 	orig_axis = vadd(planeproj(ocx, ocy, perspective, camdir, 0), vscale(planeproj(ocx, ocy, perspective, camdir, 1), -1));
 	
 	screenrot_update(canvas_x, canvas_y);
-}
+};
 var screenrot_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(obj_transforms[current_object].forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -576,7 +576,7 @@ var screenrot_update = function(canvas_x, canvas_y) {
 					0, 0, 0, 0,
 					0, 0, 0, 0,
 					0, 0, 0, 0
-				], obj_transforms[current_object].forwards);
+				], objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	obj_pos = pos;
 	
@@ -585,14 +585,14 @@ var screenrot_update = function(canvas_x, canvas_y) {
 						forwards: createRotPointAxis(obj_pos.x, obj_pos.y, obj_pos.z, theta, orig_axis),
 						reverse: createRotPointAxis(obj_pos.x, obj_pos.y, obj_pos.z, -theta, orig_axis)
 						};
-}
+};
 
 var tumble_begin = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(obj_transforms[current_object].forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -601,13 +601,13 @@ var tumble_begin = function(canvas_x, canvas_y) {
 	orig_pos = {x: ((canvas_x*2/canvas.width)-1)/aspect, y: -((canvas_y*2/canvas.height)-1)};
 	current_transform = {forwards: identity(), reverse: identity()};
 	tumble_update(canvas_x, canvas_y);
-}
+};
 var tumble_update = function(canvas_x, canvas_y) {
 	var pos = [	0, 0, 0, 1,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(obj_transforms[current_object].forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -622,7 +622,7 @@ var tumble_update = function(canvas_x, canvas_y) {
 					0, 0, 0, 0,
 					0, 0, 0, 0,
 					0, 0, 0, 0
-				], obj_transforms[current_object].forwards);
+				], objects[current_object].matrix.forwards);
 	pos = {x: pos[0], y: pos[1], z: pos[2]};
 	obj_pos = pos;
 	
@@ -641,7 +641,7 @@ var tumble_update = function(canvas_x, canvas_y) {
 						};
 	//console.log(current_transform);
 	orig_pos = {x: ((canvas_x*2/canvas.width)-1)/aspect, y: -((canvas_y*2/canvas.height)-1)};
-}
+};
 
 
 

@@ -29,7 +29,7 @@ var pickid_loc;
 //transformation matrices
 var perspective;
 var camdir;
-var obj_transforms = [];
+var objects = [];
 var current_transform;
 
 //Current number of of vertices
@@ -162,10 +162,9 @@ function init() {
 	camdir = getCameraDirection(-Math.atan(1/Math.sqrt(2)), Math.PI/4);
 	//perspective = createPerspectiveTransform(0, 0, 100, 0, 0, 0, Math.PI/2, 1, 1000);
 	
+	initObjects();
+		
 	//Set up object matrices
-	obj_transforms.push(createObjectTransform([]));
-	obj_transforms.push(createObjectTransform([{type: "t", x: 0, y: 0, z: -20}]));
-	obj_transforms.push(createObjectTransform([{type: "t", x: 0, y: 0, z: -40}]));
 	
 	current_transform = new Float32Array(identity());
 	
@@ -184,9 +183,23 @@ function init() {
 	pickid_loc = gl.getUniformLocation(pick_prog, "pickid");
 }
 
+
+
+function initObjects(){
+	for(var i = 0; i < 3; i++){
+		objects[i] = {};
+		objects[i].matrix = createObjectTransform([{type: "t", x: 0, y: 0, z:-20*i}]);
+		objects[i].model;
+		objects[i].shadow = false;
+		objects[i].light = false;
+	}
+
+		
+}
+
 //Draws the scene
 function display() {
-	/*obj_transforms[1] = createObjectTransform([	{type: "ry", r: Math.PI/6},
+	/*objects[1] = createObjectTransform([	{type: "ry", r: Math.PI/6},
 												{type: "t", x: 40, y:0, z:0},
 												{type: "rpz", x: 0, y: 50, z: 0, r: testval()*Math.PI*2}]);*/
 	/*var d = 100/Math.sqrt(3);
@@ -213,11 +226,11 @@ function display() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
-	for (var i in obj_transforms) {
+	for (var i in objects) {
 		//Set up transformation for the active object
 		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
-		var objtrans = obj_transforms[i].forwards;
-		var invobjtrans = obj_transforms[i].reverse;
+		var objtrans = objects[i].matrix.forwards;
+		var invobjtrans = invert(objtrans);
 		if (current_object == i) {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
@@ -227,7 +240,7 @@ function display() {
 		//Use the stencil shader
 		gl.useProgram(pick_prog);
 		gl.uniformMatrix4fv(pview_loc, false, mult(objtrans, perspective));
-		//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(obj_transforms[i].reverse), perspective));
+		//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(objects[i].reverse), perspective));
 		gl.uniform1i(pickid_loc, i);
 		//Use the stencil framebuffer
 		gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
@@ -396,15 +409,15 @@ function setup() {
 			if (doing_op && e.button == 0) {
 				//end the operation and accumulate the current transform into the object transform
 				mode_update(canvas_x, canvas_y);
-				obj_transforms[current_object] = {
-													forwards: mult(obj_transforms[current_object].forwards, current_transform.forwards),
-													reverse: mult(current_transform.reverse, obj_transforms[current_object].reverse)
+				objects[current_object].matrix = {
+													forwards: mult(objects[current_object].matrix.forwards, current_transform.forwards),
+													reverse: mult(current_transform.reverse, objects[current_object].matrix.reverse)
 				};
 				
 				doing_op = false;
 				current_object = -1;
 			}
-		}
+		};
 		
 		//Render for the first time
 		window.requestAnimationFrame(display);
