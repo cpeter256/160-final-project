@@ -14,7 +14,7 @@ varying vec3 normal;
 //This means the half-angle is also the same as the light angle
 
 void main() {
-	vec3 light = normalize(vec3(-1.0, 1.0, 1.0));
+	vec3 light = normalize(vec3(1.0, 1.0, 1.0));
 	float lum = dot(normalize(normal), light);
 	vec3 reflection = reflect(-light, normalize(normal));
 	float specular = max(dot(reflection, light), 0.0);

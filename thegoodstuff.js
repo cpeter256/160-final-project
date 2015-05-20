@@ -187,13 +187,20 @@ function init() {
 
 function initObjects(){
 	for(var i = 0; i < 3; i++){
-		objects[i] = {};
-		objects[i].matrix = createObjectTransform([{type: "t", x: 0, y: 0, z:-20*i}]);
-		objects[i].model;
-		objects[i].shadow = false;
-		objects[i].light = false;
+		objects[i] = {
+			matrix: createObjectTransform([{type: "t", x: 0, y: 0, z:-20*i}]),
+			cast_shadows: true,
+			is_light: false
+		};
 	}
 
+	objects.push({
+		matrix: createObjectTransform([	{type: "s", x: .1, y: .1, z: .1},
+										{type: "t", x: -10, y: 10, z: 20}
+										]),
+		cast_shadows: false,
+		is_light: true
+	});
 		
 }
 
