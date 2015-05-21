@@ -8,8 +8,14 @@
 //globals
 var gl; //the opengl context
 var aspect; //the aspect ratio of the viewport
+
 var vBuffer; //the shark vertex buffer
 var nBuffer; //the shark normal buffer
+
+var svBuffer; //the shark volume vertex buffer
+var svnBuffer; //the shark volume normal buffer
+var svsBuffer; //the shark volume side buffer;
+
 var shark_prog; //the shader for the shark
 var pick_prog; //the shader for the picking buffer
 var vol_prog; //the shader for the shadow volumes
@@ -20,6 +26,10 @@ var pick_texture; //the texture to render the pick stencil to
 var vPosition;
 var vNormal;
 
+var svPosition;
+var svNormal;
+var svSide;
+
 //uniforms
 var view_loc;
 var ntrans_loc;
@@ -29,7 +39,10 @@ var pntrans_loc;
 var pickid_loc;
 
 var vview_loc;
+var vobj_loc;
 var vntrans_loc;
+//var vtest_loc;
+var vlight_loc;
 
 //transformation matrices
 var perspective;
@@ -39,6 +52,7 @@ var current_transform;
 
 //Current number of of vertices
 var num_vertices;
+var num_vol_vertices; //oh god refactor pls
 
 //pick variables
 var current_object = -1;
@@ -163,6 +177,23 @@ function init() {
 	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.norms, gl.STATIC_DRAW);
 	vNormal = gl.getAttribLocation(shark_prog, "vNormal");
 	
+	
+	//miiight want to refactor a bunch of this code duplication into reusable functions
+	svBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.vol_data, gl.STATIC_DRAW);
+	num_vol_vertices = sharkdat.vol_size;
+	svPosition = gl.getAttribLocation(vol_prog, "vPosition");
+	svnBuffer  = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, svnBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.vol_norms, gl.STATIC_DRAW);
+	svNormal = gl.getAttribLocation(vol_prog, "vNormal");
+	svsBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.vol_side, gl.STATIC_DRAW);
+	svSide = gl.getAttribLocation(vol_prog, "side");
+	//console.log(svSide);
+	
 	//Set up the view matrix
 	var d = 100/Math.sqrt(3);
 	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI/3, 1, 1000);
@@ -190,20 +221,23 @@ function init() {
 	pickid_loc = gl.getUniformLocation(pick_prog, "pickid");
 	
 	gl.useProgram(vol_prog);
-	vview_loc = gl.getUniformLocation(vol_prog, "transform");
+	vview_loc = gl.getUniformLocation(vol_prog, "ptransform");
+	vobj_loc = gl.getUniformLocation(vol_prog, "transform");
 	vntrans_loc = gl.getUniformLocation(vol_prog, "normal_transform");
+	vlight_loc = gl.getUniformLocation(vol_prog, "light_pos");
+	//vtest_loc = gl.getUniformLocation(vol_prog, "foobar");
 }
 
 
 
 function initObjects(){
-	for(var i = 0; i < 3; i++){
+	/*for(var i = 0; i < 3; i++){
 		objects[i] = {
 			matrix: createObjectTransform([{type: "t", x: 0, y: 0, z:-20*i}]),
 			cast_shadows: true,
 			is_light: false
 		};
-	}
+	}*/
 	
 	objects.push({
 			matrix: createObjectTransform([{type: "t", x: 0, y: 0, z:20}]),
@@ -213,7 +247,7 @@ function initObjects(){
 	});
 
 	objects.push({
-		matrix: createObjectTransform([	{type: "s", x: .1, y: .1, z: .1},
+		matrix: createObjectTransform([	{type: "s", x: .4, y: .4, z: .4},
 										{type: "t", x: -10, y: 10, z: 20}
 										]),
 		cast_shadows: false,
@@ -221,6 +255,8 @@ function initObjects(){
 	});
 		
 }
+
+var test_light_pos = {x: 0, y: 0, z: 0};
 
 //Draws the scene
 function display() {
@@ -234,15 +270,6 @@ function display() {
 	gl.useProgram(pick_prog);
 	gl.uniformMatrix4fv(pview_loc, false, perspective);*/
 	
-	
-	//set up vertex attributes
-	gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vPosition);
-	gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-	gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vNormal);
-	
 	//clear the entire framebuffer
 	gl.clearColor(0.1, 0.1, 0.4, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -252,7 +279,6 @@ function display() {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
 	gl.enable(gl.CULL_FACE);
-	gl.cullFace(gl.BACK);
 	
 	for (var i in objects) {
 		//Set up transformation for the active object
@@ -264,6 +290,15 @@ function display() {
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
 		
+		if (objects[i].is_light) {
+			test_light_pos = [	0, 0, 0, 1,
+								0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0];
+			test_light_pos = mult(test_light_pos, objtrans);
+			test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
+		}
+				
 		gl.enable(gl.DEPTH_TEST);
 		//Use the stencil shader
 		gl.useProgram(pick_prog);
@@ -288,18 +323,51 @@ function display() {
 		//set the display viewport
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
-		//Set the shader to be used
-		gl.useProgram(shark_prog);
-		gl.uniformMatrix4fv(view_loc, false, mult(objtrans, perspective));
-		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
-		if (typeof objects[i].test != "undefined") {
+		
+		if (typeof objects[i].test == "undefined") {
+			//set up vertex attributes
+			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(vPosition);
+			gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(vNormal);
+			
+			//Set the shader to be used		
+			gl.cullFace(gl.BACK);
+			gl.useProgram(shark_prog);
+			gl.uniformMatrix4fv(view_loc, false, mult(objtrans, perspective));
+			gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
+			
+				
+			//draw with the specified attributes and program
+			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+		} else {
+			//set up vertex attributes
+			gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
+			gl.vertexAttribPointer(svPosition, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(svPosition);
+			gl.bindBuffer(gl.ARRAY_BUFFER, svnBuffer);
+			gl.vertexAttribPointer(svNormal, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(svNormal);
+			gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
+			gl.vertexAttribPointer(svSide, 1, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(svSide);
+			
+			
+			gl.cullFace(gl.BACK);
 			gl.useProgram(vol_prog);
-			gl.uniformMatrix4fv(vview_loc, false, mult(objtrans, perspective));
+			gl.uniformMatrix4fv(vview_loc, false, perspective);
+			gl.uniformMatrix4fv(vobj_loc, false, objtrans);
 			gl.uniformMatrix4fv(vntrans_loc, false, transpose(invobjtrans));
+			gl.uniform3fv(vlight_loc, new Float32Array([test_light_pos.x, test_light_pos.y, test_light_pos.z]));
+			
+			//gl.uniform1f(vtest_loc, testval());
+			
+			//draw with the specified attributes and program
+			gl.drawArrays(gl.TRIANGLES, 0, num_vol_vertices);
 		}
 		
-		//draw with the specified attributes and program
-		gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
 	}
 	
 	//We're drawing again soon!
@@ -363,6 +431,7 @@ function setup() {
 				gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
 				gl.readPixels(Math.floor(canvas_x), canvas.height-Math.floor(canvas_y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, sample);
 				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+				//console.log(sample[0]);
 				
 				if (sample[0] != 255 && e.button == 0) {
 					//console.log(e.button);
@@ -458,7 +527,7 @@ function setup() {
 }
 
 //debug input shit
-/*
+
 testmin.value = "0";
 testmax.value = "1";
 testtime.value = "1";
@@ -482,4 +551,4 @@ function setTestTime() {
 }
 setTestMin();
 setTestMax();
-setTestTime();*/
+setTestTime();
