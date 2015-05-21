@@ -8,8 +8,11 @@ var vert_src;
 var frag_src;
 var pickfrag_src;
 
+var volfrag_src;
+var volvert_src;
+
 //Status of our shader sources
-var shader_status = [false, false, false];
+var shader_status = [false, false, false, false, false];
 
 //Shark data
 var shark_coords;
@@ -162,7 +165,10 @@ function check_status(id, req, set) {
 		for (var i = 0; i < shader_status.length; ++i) {
 			if (!shader_status[i]) done = false;
 		}
-		if (done) setup();
+		if (done) {
+			//console.log(shader_status);
+			setup();
+		}
 	}
 }
 
@@ -251,6 +257,18 @@ function loadShaders() {
 		spf.overrideMimeType('text/plain');
 		spf.open("GET", "sharkpick.frag");
 		spf.send();
+		
+		var tvv = new_request();
+		tvv.onreadystatechange = function() {check_status(3, tvv, function(text) {volvert_src = text;});};
+		tvv.overrideMimeType('text/plain');
+		tvv.open("GET", "test_volume.vert");
+		tvv.send();
+		
+		var tvf = new_request();
+		tvf.onreadystatechange = function() {check_status(4, tvf, function(text) {volfrag_src = text;});};
+		tvf.overrideMimeType('text/plain');
+		tvf.open("GET", "test_volume.frag");
+		tvf.send();
 	} catch (e) {
 		alert("It looks like you might be using Chrome. For various reasons, Chrome is broke as shit at certain AJAX-related things. In order to run this, restart Chrome with the\n --disable-web-security flag and try again, or load it from a (possible local) web server. Or even better, run it in Firefox.");
 	}

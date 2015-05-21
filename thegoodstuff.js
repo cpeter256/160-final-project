@@ -12,6 +12,7 @@ var vBuffer; //the shark vertex buffer
 var nBuffer; //the shark normal buffer
 var shark_prog; //the shader for the shark
 var pick_prog; //the shader for the picking buffer
+var vol_prog; //the shader for the shadow volumes
 var pick_framebuffer; //the framebuffer to render the pick stencil to
 var pick_texture; //the texture to render the pick stencil to
 
@@ -21,10 +22,14 @@ var vNormal;
 
 //uniforms
 var view_loc;
-var pview_loc;
 var ntrans_loc;
+
+var pview_loc;
 var pntrans_loc;
 var pickid_loc;
+
+var vview_loc;
+var vntrans_loc;
 
 //transformation matrices
 var perspective;
@@ -137,6 +142,8 @@ function init() {
 	//Initialize the shaders to be used
 	shark_prog = initShader(gl, vert_src, frag_src);
 	pick_prog = initShader(gl, vert_src, pickfrag_src);
+	//console.log(volfrag_src);
+	vol_prog = initShader(gl, volvert_src, volfrag_src);
 	
 	//Allocate the vertex position buffer for rendering the shark
 	vBuffer = gl.createBuffer();
@@ -181,6 +188,10 @@ function init() {
 	pview_loc = gl.getUniformLocation(pick_prog, "transform");
 	pntrans_loc = gl.getUniformLocation(pick_prog, "normal_transform");
 	pickid_loc = gl.getUniformLocation(pick_prog, "pickid");
+	
+	gl.useProgram(vol_prog);
+	vview_loc = gl.getUniformLocation(vol_prog, "transform");
+	vntrans_loc = gl.getUniformLocation(vol_prog, "normal_transform");
 }
 
 
@@ -193,6 +204,13 @@ function initObjects(){
 			is_light: false
 		};
 	}
+	
+	objects.push({
+			matrix: createObjectTransform([{type: "t", x: 0, y: 0, z:20}]),
+			cast_shadows: true,
+			is_light: false,
+			test: true
+	});
 
 	objects.push({
 		matrix: createObjectTransform([	{type: "s", x: .1, y: .1, z: .1},
@@ -233,6 +251,9 @@ function display() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
+	gl.enable(gl.CULL_FACE);
+	gl.cullFace(gl.BACK);
+	
 	for (var i in objects) {
 		//Set up transformation for the active object
 		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
@@ -271,6 +292,11 @@ function display() {
 		gl.useProgram(shark_prog);
 		gl.uniformMatrix4fv(view_loc, false, mult(objtrans, perspective));
 		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
+		if (typeof objects[i].test != "undefined") {
+			gl.useProgram(vol_prog);
+			gl.uniformMatrix4fv(vview_loc, false, mult(objtrans, perspective));
+			gl.uniformMatrix4fv(vntrans_loc, false, transpose(invobjtrans));
+		}
 		
 		//draw with the specified attributes and program
 		gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
