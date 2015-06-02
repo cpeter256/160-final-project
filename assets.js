@@ -24,7 +24,7 @@ var shark_status = [false, false];
 //Builds a Float32Array usable with GL_TRIANGLE_LIST of the loaded shark
 //3 components per vertex
 function buildShark() {
-	var dat = {data: [], norms: [], flat_norms: [], size: 0, vol_data: [], vol_norms: [], vol_side: [], vol_size: 0};
+	var dat = {data: [], norms: [], flat_norms: [], size: 0};
 	var v_norms = [];
 	
 	for (var poly = 0; poly < shark_polys.length; ++poly) {
@@ -78,111 +78,6 @@ function buildShark() {
 			
 			dat.size += 3;
 			
-			
-			dat.vol_data.push(shark_coords[the_poly[1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[1]][2]);
-			dat.vol_side.push(1);
-			
-			dat.vol_data.push(shark_coords[the_poly[i-1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][2]);
-			dat.vol_side.push(1);
-			
-			dat.vol_data.push(shark_coords[the_poly[i]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i]][2]);
-			dat.vol_side.push(1);
-			
-			
-			
-			dat.vol_data.push(shark_coords[the_poly[i]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i]][2]);
-			dat.vol_side.push(0);
-			
-			dat.vol_data.push(shark_coords[the_poly[i-1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][2]);
-			dat.vol_side.push(0);
-			
-			dat.vol_data.push(shark_coords[the_poly[1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[1]][2]);
-			dat.vol_side.push(0);
-			
-			
-			dat.vol_data.push(shark_coords[the_poly[i-1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][2]);
-			dat.vol_side.push(0);
-			dat.vol_data.push(shark_coords[the_poly[i]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i]][2]);
-			dat.vol_side.push(0);
-			dat.vol_data.push(shark_coords[the_poly[i]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i]][2]);
-			dat.vol_side.push(1);
-			
-			dat.vol_data.push(shark_coords[the_poly[i]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i]][2]);
-			dat.vol_side.push(1);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][2]);
-			dat.vol_side.push(1);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][0]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][1]);
-			dat.vol_data.push(shark_coords[the_poly[i-1]][2]);
-			dat.vol_side.push(0);
-			
-			var amount = 12;
-			
-			if (i == 3) { //wow so style many codes
-				amount += 12;
-				var shameless_kluge = i;
-				for (i = 1; i <= 2; i++) {
-					var another_kluge = i-1;
-					if (another_kluge == 0) another_kluge = the_poly.length-1;
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][0]);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][1]);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][2]);
-					dat.vol_side.push(0);
-					dat.vol_data.push(shark_coords[the_poly[i]][0]);
-					dat.vol_data.push(shark_coords[the_poly[i]][1]);
-					dat.vol_data.push(shark_coords[the_poly[i]][2]);
-					dat.vol_side.push(0);
-					dat.vol_data.push(shark_coords[the_poly[i]][0]);
-					dat.vol_data.push(shark_coords[the_poly[i]][1]);
-					dat.vol_data.push(shark_coords[the_poly[i]][2]);
-					dat.vol_side.push(1);
-					
-					dat.vol_data.push(shark_coords[the_poly[i]][0]);
-					dat.vol_data.push(shark_coords[the_poly[i]][1]);
-					dat.vol_data.push(shark_coords[the_poly[i]][2]);
-					dat.vol_side.push(1);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][0]);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][1]);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][2]);
-					dat.vol_side.push(1);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][0]);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][1]);
-					dat.vol_data.push(shark_coords[the_poly[another_kluge]][2]);
-					dat.vol_side.push(0);
-				}
-				
-				i = shameless_kluge;
-			}
-			
-			for (var j = 0; j < amount; j++) {
-				dat.vol_norms.push(norm.x);
-				dat.vol_norms.push(norm.y);
-				dat.vol_norms.push(norm.z);
-			}
-			
-			dat.vol_size += amount;
 		}
 		
 		//Accumulate the polygon normal into every vertex in the polygon
@@ -220,9 +115,6 @@ function buildShark() {
 	dat.norms = new Float32Array(dat.norms);
 	dat.flat_norms = new Float32Array(dat.flat_norms);
 	
-	dat.vol_data = new Float32Array(dat.vol_data);
-	dat.vol_norms = new Float32Array(dat.vol_norms);
-	dat.vol_side = new Float32Array(dat.vol_side);
 	return dat;
 }
 

@@ -5,6 +5,16 @@
 
 "use strict";
 
+//HOW TO MAKE SILLUETTE:
+/*
+ *     Loop through all the model's triangles
+    If triangle faces the light source (dot product > 0)
+    Insert the three edges (pair of vertices), into an edge stack
+    Check for previous occurrence of each edges or it's reverse in the stack
+    If an edge or its reverse is found in the stack, remove both edges
+    Start with new triangle
+ */
+
 //globals
 var gl; //the opengl context
 var aspect; //the aspect ratio of the viewport
@@ -181,16 +191,16 @@ function init() {
 	//miiight want to refactor a bunch of this code duplication into reusable functions
 	svBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.vol_data, gl.STATIC_DRAW);
-	num_vol_vertices = sharkdat.vol_size;
+	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.data, gl.STATIC_DRAW);
+	num_vol_vertices = sharkdat.size;
 	svPosition = gl.getAttribLocation(vol_prog, "vPosition");
 	svnBuffer  = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svnBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.vol_norms, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.norms, gl.STATIC_DRAW);
 	svNormal = gl.getAttribLocation(vol_prog, "vNormal");
 	svsBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.vol_side, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(num_vol_vertices), gl.STATIC_DRAW);
 	svSide = gl.getAttribLocation(vol_prog, "side");
 	//console.log(svSide);
 	
