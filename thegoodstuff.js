@@ -25,6 +25,9 @@ var nBuffer; //the shark normal buffer
 var svBuffer; //the shark volume vertex buffer
 var svsBuffer; //the shark volume side buffer;
 
+var floorbuffer;
+var floornbuffer;
+
 var shark_prog; //the shader for the shark
 var pick_prog; //the shader for the picking buffer
 var vol_prog; //the shader for the shadow volumes
@@ -198,9 +201,30 @@ function init() {
 	svsBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size), gl.DYNAMIC_DRAW);
-	
 	svSide = gl.getAttribLocation(vol_prog, "side");
 	//console.log(svSide);
+	
+	floorbuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		-1, 0, -1,
+		1, 0, -1,
+		1, 0, 1,
+		-1, 0, -1,
+		1, 0, 1,
+		-1, 0, 1
+	]), gl.STATIC_DRAW);
+	floornbuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0
+	]), gl.STATIC_DRAW);
+	
 	
 	//Set up the view matrix
 	var d = 100/Math.sqrt(3);
@@ -248,10 +272,19 @@ function initObjects(){
 	}*/
 	
 	objects.push({
+			matrix: createObjectTransform([	{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: 0, y: -50, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true
+	});
+	
+	objects.push({
 			matrix: createObjectTransform([	{type: "s", x: 20, y: 20, z: 20},
 											{type: "t", x: 0, y: 0, z:-10}]),
 			cast_shadows: true,
 			is_light: false,
+			is_floor: false,
 			test: true
 	});
 
@@ -261,6 +294,7 @@ function initObjects(){
 										{type: "t", x: 0, y: 0, z: 25}
 										]),
 		cast_shadows: false,
+		is_floor: false,
 		is_light: true
 	});
 		
@@ -321,7 +355,15 @@ function display() {
 		//Set the viewport
 		gl.viewport(0, 0, canvas.width, canvas.height);
 		
-		
+		if (objects[i].is_floor) {
+			//set up vertex attributes
+			gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
+			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(vPosition);
+			gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
+			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(vNormal);
+		} else {
 			//set up vertex attributes
 			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
@@ -329,9 +371,12 @@ function display() {
 			gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
 			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(vNormal);
+		}
 		
-		//Draw the picking stencil
-		gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+		if (!objects[i].is_floor) {
+			//Draw the picking stencil
+			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+		}
 		
 		//Unbind the framebuffer so we draw to the device now
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -342,19 +387,21 @@ function display() {
 		//set the display viewport
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
+		//Set the shader to be used		
+		gl.cullFace(gl.BACK);
+		gl.useProgram(shark_prog);
+		gl.uniformMatrix4fv(view_loc, false, mult(objtrans, perspective));
+		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
 		
-		if (typeof objects[i].test == "undefined") {
-			
-			//Set the shader to be used		
-			gl.cullFace(gl.BACK);
-			gl.useProgram(shark_prog);
-			gl.uniformMatrix4fv(view_loc, false, mult(objtrans, perspective));
-			gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
-			
-				
+		if (objects[i].is_floor) {
+			gl.drawArrays(gl.TRIANGLES, 0, 6);
+		} else {
 			//draw with the specified attributes and program
 			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
-		} else {
+		}
+		
+			
+		if (typeof objects[i].test != "undefined") {
 			var relative_pos = test_light_pos;
 			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
 							0, 0, 0, 0,
