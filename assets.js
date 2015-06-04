@@ -156,6 +156,41 @@ function makeSilhouette(coords, polys, lightpos) {
 		var d = dot(norm, a);
 		
 		if (dot(norm, lightpos) > d) {
+			for (var i = 3; i < shark_polys[poly].length; ++i) {
+				dat.data.push(coords[the_poly[1]][0]);
+				dat.data.push(coords[the_poly[1]][1]);
+				dat.data.push(coords[the_poly[1]][2]);
+				dat.side.push(0);
+				
+				dat.data.push(coords[the_poly[i-1]][0]);
+				dat.data.push(coords[the_poly[i-1]][1]);
+				dat.data.push(coords[the_poly[i-1]][2]);
+				dat.side.push(0);
+				
+				dat.data.push(coords[the_poly[i]][0]);
+				dat.data.push(coords[the_poly[i]][1]);
+				dat.data.push(coords[the_poly[i]][2]);
+				dat.side.push(0);
+				
+				dat.data.push(coords[the_poly[1]][0]);
+				dat.data.push(coords[the_poly[1]][1]);
+				dat.data.push(coords[the_poly[1]][2]);
+				dat.side.push(1);
+				
+				dat.data.push(coords[the_poly[i-1]][0]);
+				dat.data.push(coords[the_poly[i-1]][1]);
+				dat.data.push(coords[the_poly[i-1]][2]);
+				dat.side.push(1);
+				
+				dat.data.push(coords[the_poly[i]][0]);
+				dat.data.push(coords[the_poly[i]][1]);
+				dat.data.push(coords[the_poly[i]][2]);
+				dat.side.push(1);
+				
+				dat.size += 6;	
+			}
+			
+			
 			for (var i = 2; i <= shark_polys[poly].length; ++i) {
 				var edge;
 				if (i < shark_polys[poly].length) {

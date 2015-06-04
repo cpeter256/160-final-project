@@ -410,6 +410,26 @@ function display() {
 		}
 		
 			
+		
+	}
+	for (var i in objects) {
+		//Set up transformation for the active object
+		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
+		var objtrans = objects[i].matrix.forwards;
+		var invobjtrans = invert(objtrans);
+		if (current_object == i) {
+			objtrans = mult(objtrans, current_transform.forwards);
+			invobjtrans = mult(current_transform.reverse, invobjtrans);
+		}
+		
+		if (objects[i].is_light) {
+			test_light_pos = [	0, 0, 0, 1,
+								0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0];
+			test_light_pos = mult(test_light_pos, objtrans);
+			test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
+		}
 		if (typeof objects[i].test != "undefined") {
 			var relative_pos = test_light_pos;
 			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
@@ -450,7 +470,6 @@ function display() {
 			//draw with the specified attributes and program
 			gl.drawArrays(gl.TRIANGLES, 0, num_vol_vertices);
 		}
-		
 	}
 	
 	//We're drawing again soon!
