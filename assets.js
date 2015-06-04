@@ -44,8 +44,8 @@ function buildShark() {
 		};
 		
 		//Get normal for this polygon
-		var u = vadd(b, vscale(a, -1));
-		var v = vadd(b, vscale(c, -1));
+		var v = vadd(b, vscale(a, -1));
+		var u = vadd(b, vscale(c, -1));
 		var norm = normalize(cross(u, v));
 		/*
 		if (isNaN(norm.x) || isNaN(norm.y) || isNaN(norm.z)) {
@@ -155,7 +155,7 @@ function makeSilhouette(coords, polys, lightpos) {
 		var norm = normalize(cross(u, v));
 		var d = dot(norm, a);
 		
-		if (dot(norm, lightpos) > d) {
+		if (dot(norm, lightpos) < d) {
 			for (var i = 3; i < shark_polys[poly].length; ++i) {
 				dat.data.push(coords[the_poly[1]][0]);
 				dat.data.push(coords[the_poly[1]][1]);
@@ -427,6 +427,8 @@ function loadShaders() {
 		tvf.overrideMimeType('text/plain');
 		tvf.open("GET", "test_volume.frag");
 		tvf.send();
+		
+		//IMPORTANT add 2 more (darkener.frag and darkener.vert)
 	} catch (e) {
 		alert("It looks like you might be using Chrome. For various reasons, Chrome is broke as shit at certain AJAX-related things. In order to run this, restart Chrome with the\n --disable-web-security flag and try again, or load it from a (possible local) web server. Or even better, run it in Firefox.");
 	}

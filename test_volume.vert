@@ -29,7 +29,7 @@ void main() {
 		gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
 	} else {*/
 		gl_Position -= vec4(light_pos, 0.0);
-		gl_Position += normalize(gl_Position)*side*1000.0; gl_Position.w = 1.0;
+		gl_Position += normalize(gl_Position)*side*500.0; gl_Position.w = 1.0;
 		gl_Position += vec4(light_pos, 0.0);
 		gl_Position = ptransform*gl_Position;
 	//}

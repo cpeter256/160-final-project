@@ -165,6 +165,7 @@ function init() {
 	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
+	
 	//Set depth test function
 	gl.depthFunc(gl.LESS);
 	
@@ -211,11 +212,11 @@ function init() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
 		-1, 0, -1,
-		1, 0, -1,
+		-1, 0, 1,
 		1, 0, 1,
 		-1, 0, -1,
 		1, 0, 1,
-		-1, 0, 1
+		1, 0, -1
 	]), gl.STATIC_DRAW);
 	floornbuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
@@ -329,7 +330,7 @@ function display() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
-	//gl.enable(gl.CULL_FACE);
+	gl.enable(gl.CULL_FACE);
 	
 	for (var i in objects) {
 		//Set up transformation for the active object
@@ -412,6 +413,15 @@ function display() {
 			
 		
 	}
+	
+	gl.colorMask(false, false, false, false);
+	gl.depthMask(false);
+	gl.enable(gl.STENCIL_TEST);
+	gl.clear(gl.STENCIL_BUFFER_BIT);
+	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
+	gl.cullFace(gl.BACK);
+	gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
+	
 	for (var i in objects) {
 		//Set up transformation for the active object
 		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
@@ -471,6 +481,21 @@ function display() {
 			gl.drawArrays(gl.TRIANGLES, 0, num_vol_vertices);
 		}
 	}
+	
+	gl.colorMask(true, true, true, true);
+	gl.disable(gl.DEPTH_TEST);
+	
+	//IMPORTANT
+	//right now we only do one render, we need to do it twice though
+	//see https://en.wikipedia.org/wiki/Shadow_volume under Depth Fail
+	//useful: https://open.gl/depthstencils
+	//https://msdn.microsoft.com/en-us/library/dn302371%28v=vs.85%29.aspx
+	//Once we've masked out the shadowed area, we just draw one big quad over the whole screen
+	//the stencil will cut out all the parts we dont want
+	
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthMask(true);
+	
 	
 	//We're drawing again soon!
 	window.requestAnimationFrame(display);
