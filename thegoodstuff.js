@@ -183,7 +183,7 @@ function init() {
 	
 	nBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.norms, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.flat_norms, gl.STATIC_DRAW);
 	vNormal = gl.getAttribLocation(shark_prog, "vNormal");
 	
 	
@@ -248,15 +248,17 @@ function initObjects(){
 	}*/
 	
 	objects.push({
-			matrix: createObjectTransform([{type: "t", x: 0, y: 0, z:20}]),
+			matrix: createObjectTransform([	{type: "s", x: 20, y: 20, z: 20},
+											{type: "t", x: 0, y: 0, z:-10}]),
 			cast_shadows: true,
 			is_light: false,
 			test: true
 	});
 
 	objects.push({
-		matrix: createObjectTransform([	{type: "s", x: .4, y: .4, z: .4},
-										{type: "t", x: -10, y: 10, z: 20}
+		matrix: createObjectTransform([	{type: "s", x: 20, y: 20, z: 20},
+										{type: "s", x: .4, y: .4, z: .4},
+										{type: "t", x: 0, y: 0, z: 25}
 										]),
 		cast_shadows: false,
 		is_light: true
@@ -286,7 +288,7 @@ function display() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
-	gl.enable(gl.CULL_FACE);
+	//gl.enable(gl.CULL_FACE);
 	
 	for (var i in objects) {
 		//Set up transformation for the active object

@@ -44,8 +44,8 @@ function buildShark() {
 		};
 		
 		//Get normal for this polygon
-		var v = vadd(b, vscale(a, -1));
-		var u = vadd(b, vscale(c, -1));
+		var u = vadd(b, vscale(a, -1));
+		var v = vadd(b, vscale(c, -1));
 		var norm = normalize(cross(u, v));
 		/*
 		if (isNaN(norm.x) || isNaN(norm.y) || isNaN(norm.z)) {
@@ -153,11 +153,16 @@ function makeSilhouette(coords, polys, lightpos) {
 		var v = vadd(b, vscale(a, -1));
 		var u = vadd(b, vscale(c, -1));
 		var norm = normalize(cross(u, v));
-		var view = vadd(lightpos, vscale(a, -1/3));
+		var d = dot(norm, a);
 		
-		if (dot(norm, view) < 0 || true) {
-			for (var i = 2; i < shark_polys[poly].length; ++i) {
-				var edge = {i1: the_poly[i-1], i2: the_poly[i]};
+		if (dot(norm, lightpos) > d) {
+			for (var i = 2; i <= shark_polys[poly].length; ++i) {
+				var edge;
+				if (i < shark_polys[poly].length) {
+					edge = {i1: the_poly[i-1], i2: the_poly[i]};
+				} else {
+					edge = {i1: the_poly[i-1], i2: the_poly[1]};
+				}
 				if (coords[edge.i1][4]) {
 					//edge.i1 = coords[edge.i1][4];
 				}
@@ -168,21 +173,21 @@ function makeSilhouette(coords, polys, lightpos) {
 				
 				var notfound = true;
 				if (edgeset[hashEdge(edge)]) {
-					//delete edgeset[hashEdge(edge)];
+					delete edgeset[hashEdge(edge)];
 					notfound = false;
 					//edgeset[hashEdge(edge)] = null;
 					//edgeset[hashEdge(iedge)] = null;
 				}
 				if (edgeset[hashEdge(iedge)]) {
-					//delete edgeset[hashEdge(iedge)];
+					delete edgeset[hashEdge(iedge)];
 					notfound = false;
 					//edgeset[hashEdge(edge)] = null;
 					//edgeset[hashEdge(iedge)] = null;
 				}
 				
-				//if (notfound) {
+				if (notfound) {
 					edgeset[hashEdge(edge)] = edge;
-				//}
+				}
 			}
 		}
 	}
