@@ -188,17 +188,16 @@ function init() {
 	
 	
 	//miiight want to refactor a bunch of this code duplication into reusable functions
-	var vol_size = shark_polys.length*6;
-	console.log(vol_size*3 - sharkdat.data.length, vol_size-sharkdat.size);
+	var vol_size = shark_polys.length*6*6;
 	svBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size*3), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size*3), gl.DYNAMIC_DRAW);
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, sharkdat.data);
-	num_vol_vertices = sharkdat.size;;
+	num_vol_vertices = sharkdat.size;
 	svPosition = gl.getAttribLocation(vol_prog, "vPosition");
 	svsBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size), gl.DYNAMIC_DRAW);
 	
 	svSide = gl.getAttribLocation(vol_prog, "side");
 	//console.log(svSide);
@@ -354,11 +353,29 @@ function display() {
 			//draw with the specified attributes and program
 			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
 		} else {
+			var relative_pos = test_light_pos;
+			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
+							0, 0, 0, 0,
+							0, 0, 0, 0,
+							0, 0, 0, 0];
+			relative_pos = mult(relative_pos, invobjtrans);
+			relative_pos = {x: relative_pos[0], y: relative_pos[1], z: relative_pos[2]};
+			var s_dat = makeSilhouette(shark_coords, shark_polys, relative_pos);
+			
+			num_vol_vertices = s_dat.size;
+			
 			//set up vertex attributes
+			//console.log(s_dat.data.length-s_dat.size*3);
+			
+			gl.disableVertexAttribArray(vPosition);
+			gl.disableVertexAttribArray(vNormal);
+			
 			gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
+			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.data);
 			gl.vertexAttribPointer(svPosition, 3, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svPosition);
 			gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
+			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.side);
 			gl.vertexAttribPointer(svSide, 1, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svSide);
 			

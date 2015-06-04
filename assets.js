@@ -155,7 +155,7 @@ function makeSilhouette(coords, polys, lightpos) {
 		var norm = normalize(cross(u, v));
 		var view = vadd(lightpos, vscale(a, -1/3));
 		
-		if (dot(norm, view) < 0) {
+		if (dot(norm, view) < 0 || true) {
 			for (var i = 2; i < shark_polys[poly].length; ++i) {
 				var edge = {i1: the_poly[i-1], i2: the_poly[i]};
 				if (coords[edge.i1][4]) {
