@@ -44,9 +44,12 @@ var svSide;
 
 //uniforms
 var view_loc;
+var obj_loc;
 var ntrans_loc;
+var campos_loc;
 
 var pview_loc;
+var pobj_loc;
 var pntrans_loc;
 var pickid_loc;
 
@@ -230,6 +233,7 @@ function init() {
 	var d = 100/Math.sqrt(3);
 	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI/3, 1, 1000);
 	camdir = getCameraDirection(-Math.atan(1/Math.sqrt(2)), Math.PI/4);
+	gl.uniform4fv(campos_loc, new Float32Array([d, d, d, 1]));
 	//perspective = createPerspectiveTransform(0, 0, 100, 0, 0, 0, Math.PI/2, 1, 1000);
 	
 	initObjects();
@@ -242,13 +246,16 @@ function init() {
 	gl.useProgram(shark_prog);
 	
 	//Projection matrix to use
-	view_loc = gl.getUniformLocation(shark_prog, "transform");
+	view_loc = gl.getUniformLocation(shark_prog, "ptransform");
+	obj_loc = gl.getUniformLocation(shark_prog, "transform");
+	campos_loc = gl.getUniformLocation(shark_prog, "campos");
 	
 	//Normal transformation to use
 	ntrans_loc = gl.getUniformLocation(shark_prog, "normal_transform");
 	
 	gl.useProgram(pick_prog);
-	pview_loc = gl.getUniformLocation(pick_prog, "transform");
+	pview_loc = gl.getUniformLocation(pick_prog, "ptransform");
+	pobj_loc = gl.getUniformLocation(pick_prog, "transform");
 	pntrans_loc = gl.getUniformLocation(pick_prog, "normal_transform");
 	pickid_loc = gl.getUniformLocation(pick_prog, "pickid");
 	
@@ -346,7 +353,8 @@ function display() {
 		gl.enable(gl.DEPTH_TEST);
 		//Use the stencil shader
 		gl.useProgram(pick_prog);
-		gl.uniformMatrix4fv(pview_loc, false, mult(objtrans, perspective));
+		gl.uniformMatrix4fv(pobj_loc, false, objtrans);
+		gl.uniformMatrix4fv(pview_loc, false, perspective);
 		//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(objects[i].reverse), perspective));
 		gl.uniform1i(pickid_loc, i);
 		//Use the stencil framebuffer
@@ -390,9 +398,10 @@ function display() {
 		//Set the shader to be used		
 		gl.cullFace(gl.BACK);
 		gl.useProgram(shark_prog);
-		gl.uniformMatrix4fv(view_loc, false, mult(objtrans, perspective));
+		gl.uniformMatrix4fv(obj_loc, false, objtrans);
+		gl.uniformMatrix4fv(view_loc, false, perspective);
 		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
-		
+
 		if (objects[i].is_floor) {
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 		} else {
