@@ -75,7 +75,7 @@ function buildShark() {
 			dat.flat_norms.push(norm.x);
 			dat.flat_norms.push(norm.y);
 			dat.flat_norms.push(norm.z);
-			
+				
 			dat.size += 3;
 			
 		}
@@ -116,6 +116,122 @@ function buildShark() {
 	dat.flat_norms = new Float32Array(dat.flat_norms);
 	
 	return dat;
+}
+
+function makeSilhouette(coords, polys, lightpos) {
+	//HOW TO MAKE SILHOUETTE:
+	/*
+	 *     Loop through all the model's triangles
+	    If triangle faces the light source (dot product > 0)
+	    Insert the three edges (pair of vertices), into an edge stack
+	    Check for previous occurrence of each edges or it's reverse in the stack
+	    If an edge or its reverse is found in the stack, remove both edges
+	    Start with new triangle
+	 */
+	
+	var dat = {data: [], side: [], size: 0};
+	
+	var edgeset = {};
+	
+	for (var poly = 0; poly < polys.length; ++poly) {
+		var the_poly = polys[poly];
+		
+		var a = {	x: coords[the_poly[1]][0],
+					y: coords[the_poly[1]][1],
+					z: coords[the_poly[1]][2]
+		};
+		var b = {	x: coords[the_poly[2]][0],
+					y: coords[the_poly[2]][1],
+					z: coords[the_poly[2]][2]
+		};
+		var c = {	x: coords[the_poly[3]][0],
+					y: coords[the_poly[3]][1],
+					z: coords[the_poly[3]][2]
+		};
+		
+		//Get normal for this polygon
+		var v = vadd(b, vscale(a, -1));
+		var u = vadd(b, vscale(c, -1));
+		var norm = normalize(cross(u, v));
+		var view = vadd(lightpos, vscale(a, -1/3));
+		
+		if (dot(norm, view) < 0) {
+			for (var i = 2; i < shark_polys[poly].length; ++i) {
+				var edge = {i1: the_poly[i-1], i2: the_poly[i]};
+				if (coords[edge.i1][4]) {
+					//edge.i1 = coords[edge.i1][4];
+				}
+				if (coords[edge.i2][4]) {
+					//edge.i2 = coords[edge.i2][4];
+				}
+				var iedge = {i1: edge.i2, i2: edge.i1};
+				
+				var notfound = true;
+				if (edgeset[hashEdge(edge)]) {
+					//delete edgeset[hashEdge(edge)];
+					notfound = false;
+					//edgeset[hashEdge(edge)] = null;
+					//edgeset[hashEdge(iedge)] = null;
+				}
+				if (edgeset[hashEdge(iedge)]) {
+					//delete edgeset[hashEdge(iedge)];
+					notfound = false;
+					//edgeset[hashEdge(edge)] = null;
+					//edgeset[hashEdge(iedge)] = null;
+				}
+				
+				//if (notfound) {
+					edgeset[hashEdge(edge)] = edge;
+				//}
+			}
+		}
+	}
+	
+	for (var i in edgeset) {
+		if (edgeset[i] == null) continue;
+		
+		var x1 = coords[edgeset[i].i1][0];
+		var y1 = coords[edgeset[i].i1][1];
+		var z1 = coords[edgeset[i].i1][2];
+		var x2 = coords[edgeset[i].i2][0];
+		var y2 = coords[edgeset[i].i2][1];
+		var z2 = coords[edgeset[i].i2][2];
+		
+		dat.data.push(x1);
+		dat.data.push(y1);
+		dat.data.push(z1);
+		dat.side.push(0);
+		dat.data.push(x2);
+		dat.data.push(y2);
+		dat.data.push(z2);
+		dat.side.push(0);
+		dat.data.push(x1);
+		dat.data.push(y1);
+		dat.data.push(z1);
+		dat.side.push(1);
+		
+		dat.data.push(x1);
+		dat.data.push(y1);
+		dat.data.push(z1);
+		dat.side.push(1);
+		dat.data.push(x2);
+		dat.data.push(y2);
+		dat.data.push(z2);
+		dat.side.push(0);
+		dat.data.push(x2);
+		dat.data.push(y2);
+		dat.data.push(z2);
+		dat.side.push(1);
+		
+		dat.size += 6;
+	}
+	
+	dat.data = new Float32Array(dat.data);
+	dat.side = new Float32Array(dat.side);
+	return dat;
+}
+function hashEdge(edge) {
+	return edge.i1*shark_coords.length + edge.i2;
 }
 
 //Loads shark resources

@@ -11,5 +11,5 @@ void main() {
 	vec3 light = normalize(vec3(1.0, 1.0, 1.0));
 	float lum = dot(normalize(normal), light);
 	
-	gl_FragColor = vec4(lum*vec3(1.0, 1.0, 0.0), 1.0);
+	gl_FragColor = vec4(vec3(1.0, 1.0, 0.0), 1.0);
 }

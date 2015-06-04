@@ -2566,3 +2566,52 @@ shark_coords = [
 	[-48.956470,-9.561599,6.793380],
 	[-45.757263,-9.378274,7.347012]
 ];
+
+console.log("preprocessing shitty shark model...");
+
+//this removes duplicate coordinates
+for (var i = 1; i < shark_coords.length; i++) {
+	for (var j = i+1; j < shark_coords.length; j++) {
+		var eq = true;
+		for (var k = 0; k < 2; k++) {
+			if (shark_coords[i][k] != shark_coords[j][k]) {
+				eq = false;
+				break;
+			}
+		}
+		if (eq) {
+			var final_id = i;
+			while (shark_coords[final_id][4]) {
+				//console.log(final_id);
+				final_id = shark_coords[final_id][4];
+			}
+			shark_coords[j][4] = final_id;
+		}
+	}
+}
+console.log("done!");
+
+for (var i = 1; i < shark_coords.length; i++) {
+	for (var j = i+1; j < shark_coords.length; j++) {
+		var i2 = i;
+		if (shark_coords[i2][4]) {
+			i2 = shark_coords[i2][4];
+		}
+		var j2 = j;
+		if (shark_coords[j2][4]) {
+			j2 = shark_coords[j2][4];
+		}
+		if (i2 != j2) {
+			var eq = true;
+			for (var k = 0; k < 2; k++) {
+				if (shark_coords[i2][k] != shark_coords[j2][k]) {
+					eq = false;
+					break;
+				}
+			}
+			if (eq) {
+				console.log("OH SHIT");
+			}
+		}
+	}
+}

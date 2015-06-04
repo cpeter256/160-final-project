@@ -645,7 +645,7 @@ var tumble_update = function(canvas_x, canvas_y) {
 
 
 
-setmode("transscreen");
+setmode("transyz");
 
 var assetsjs = document.createElement('script');
 assetsjs.type = 'text/javascript';

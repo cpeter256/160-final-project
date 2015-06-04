@@ -23,7 +23,6 @@ var vBuffer; //the shark vertex buffer
 var nBuffer; //the shark normal buffer
 
 var svBuffer; //the shark volume vertex buffer
-var svnBuffer; //the shark volume normal buffer
 var svsBuffer; //the shark volume side buffer;
 
 var shark_prog; //the shader for the shark
@@ -189,18 +188,18 @@ function init() {
 	
 	
 	//miiight want to refactor a bunch of this code duplication into reusable functions
+	var vol_size = shark_polys.length*6;
+	console.log(vol_size*3 - sharkdat.data.length, vol_size-sharkdat.size);
 	svBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.data, gl.STATIC_DRAW);
-	num_vol_vertices = sharkdat.size;
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size*3), gl.STATIC_DRAW);
+	gl.bufferSubData(gl.ARRAY_BUFFER, 0, sharkdat.data);
+	num_vol_vertices = sharkdat.size;;
 	svPosition = gl.getAttribLocation(vol_prog, "vPosition");
-	svnBuffer  = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, svnBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, sharkdat.norms, gl.STATIC_DRAW);
-	svNormal = gl.getAttribLocation(vol_prog, "vNormal");
 	svsBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(num_vol_vertices), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vol_size), gl.STATIC_DRAW);
+	
 	svSide = gl.getAttribLocation(vol_prog, "side");
 	//console.log(svSide);
 	
@@ -321,6 +320,15 @@ function display() {
 		//Set the viewport
 		gl.viewport(0, 0, canvas.width, canvas.height);
 		
+		
+			//set up vertex attributes
+			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(vPosition);
+			gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(vNormal);
+		
 		//Draw the picking stencil
 		gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
 		
@@ -335,13 +343,6 @@ function display() {
 		
 		
 		if (typeof objects[i].test == "undefined") {
-			//set up vertex attributes
-			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vPosition);
-			gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vNormal);
 			
 			//Set the shader to be used		
 			gl.cullFace(gl.BACK);
@@ -357,9 +358,6 @@ function display() {
 			gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
 			gl.vertexAttribPointer(svPosition, 3, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svPosition);
-			gl.bindBuffer(gl.ARRAY_BUFFER, svnBuffer);
-			gl.vertexAttribPointer(svNormal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(svNormal);
 			gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
 			gl.vertexAttribPointer(svSide, 1, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svSide);
