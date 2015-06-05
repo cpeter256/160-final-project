@@ -11,8 +11,11 @@ var pickfrag_src;
 var volfrag_src;
 var volvert_src;
 
+var darkvert_src;
+var darkfrag_src;
+
 //Status of our shader sources
-var shader_status = [false, false, false, false, false];
+var shader_status = [false, false, false, false, false, false, false,];
 
 //Shark data
 var shark_coords;
@@ -428,7 +431,18 @@ function loadShaders() {
 		tvf.open("GET", "test_volume.frag");
 		tvf.send();
 		
-		//IMPORTANT add 2 more (darkener.frag and darkener.vert)
+		var dv = new_request();
+		dv.onreadystatechange = function() {check_status(5, dv, function(text) {darkvert_src = text;});};
+		dv.overrideMimeType('text/plain');
+		dv.open("GET", "darkener.vert");
+		dv.send();
+		
+		var df = new_request();
+		df.onreadystatechange = function() {check_status(6, df, function(text) {darkfrag_src = text;});};
+		df.overrideMimeType('text/plain');
+		df.open("GET", "darkener.frag");
+		df.send();
+		
 	} catch (e) {
 		alert("It looks like you might be using Chrome. For various reasons, Chrome is broke as shit at certain AJAX-related things. In order to run this, restart Chrome with the\n --disable-web-security flag and try again, or load it from a (possible local) web server. Or even better, run it in Firefox.");
 	}
