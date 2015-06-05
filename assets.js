@@ -163,21 +163,6 @@ function makeSilhouette(coords, polys, lightpos) {
 				dat.data.push(coords[the_poly[1]][0]);
 				dat.data.push(coords[the_poly[1]][1]);
 				dat.data.push(coords[the_poly[1]][2]);
-				dat.side.push(0);
-				
-				dat.data.push(coords[the_poly[i-1]][0]);
-				dat.data.push(coords[the_poly[i-1]][1]);
-				dat.data.push(coords[the_poly[i-1]][2]);
-				dat.side.push(0);
-				
-				dat.data.push(coords[the_poly[i]][0]);
-				dat.data.push(coords[the_poly[i]][1]);
-				dat.data.push(coords[the_poly[i]][2]);
-				dat.side.push(0);
-				
-				dat.data.push(coords[the_poly[1]][0]);
-				dat.data.push(coords[the_poly[1]][1]);
-				dat.data.push(coords[the_poly[1]][2]);
 				dat.side.push(1);
 				
 				dat.data.push(coords[the_poly[i-1]][0]);
@@ -190,7 +175,7 @@ function makeSilhouette(coords, polys, lightpos) {
 				dat.data.push(coords[the_poly[i]][2]);
 				dat.side.push(1);
 				
-				dat.size += 6;	
+				dat.size += 3;	
 			}
 			
 			
@@ -226,6 +211,25 @@ function makeSilhouette(coords, polys, lightpos) {
 				if (notfound) {
 					edgeset[hashEdge(edge)] = edge;
 				}
+			}
+		} else {
+			for (var i = 3; i < shark_polys[poly].length; ++i) {
+				dat.data.push(coords[the_poly[1]][0]);
+				dat.data.push(coords[the_poly[1]][1]);
+				dat.data.push(coords[the_poly[1]][2]);
+				dat.side.push(0);
+				
+				dat.data.push(coords[the_poly[i-1]][0]);
+				dat.data.push(coords[the_poly[i-1]][1]);
+				dat.data.push(coords[the_poly[i-1]][2]);
+				dat.side.push(0);
+				
+				dat.data.push(coords[the_poly[i]][0]);
+				dat.data.push(coords[the_poly[i]][1]);
+				dat.data.push(coords[the_poly[i]][2]);
+				dat.side.push(0);
+				
+				dat.size += 3;
 			}
 		}
 	}

@@ -28,9 +28,12 @@ var svsBuffer; //the shark volume side buffer;
 var floorbuffer;
 var floornbuffer;
 
+var scrbuffer; //quad to cover all of clipspace (vec2)
+
 var shark_prog; //the shader for the shark
 var pick_prog; //the shader for the picking buffer
 var vol_prog; //the shader for the shadow volumes
+var scr_prog;
 var pick_framebuffer; //the framebuffer to render the pick stencil to
 var pick_texture; //the texture to render the pick stencil to
 
@@ -41,6 +44,8 @@ var vNormal;
 var svPosition;
 var svNormal;
 var svSide;
+
+var scrPosition;
 
 //uniforms
 var view_loc;
@@ -174,6 +179,7 @@ function init() {
 	pick_prog = initShader(gl, vert_src, pickfrag_src);
 	//console.log(volfrag_src);
 	vol_prog = initShader(gl, volvert_src, volfrag_src);
+	scr_prog = initShader(gl, darkvert_src, darkfrag_src);
 	
 	//Allocate the vertex position buffer for rendering the shark
 	vBuffer = gl.createBuffer();
@@ -229,6 +235,17 @@ function init() {
 		0, 1, 0
 	]), gl.STATIC_DRAW);
 	
+	scrbuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, scrbuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		-1, -1,
+		-1, 1,
+		1, 1,
+		-1, -1,
+		1, 1,
+		1, -1
+	]), gl.STATIC_DRAW);
+	scrPosition = gl.getAttribLocation(scr_prog, "vPosition");
 	
 	//Set up the view matrix
 	var d = 100/Math.sqrt(3);
@@ -421,10 +438,74 @@ function display() {
 	gl.colorMask(false, false, false, false);
 	gl.depthMask(false);
 	gl.enable(gl.STENCIL_TEST);
+	gl.clearStencil(0x00000000);
 	gl.clear(gl.STENCIL_BUFFER_BIT);
 	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
-	gl.cullFace(gl.BACK);
-	gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
+	gl.cullFace(gl.FRONT);
+	gl.stencilOp(gl.KEEP, gl.INCR, gl.KEEP);
+	
+	for (var i in objects) {
+		//Set up transformation for the active object
+		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
+		var objtrans = objects[i].matrix.forwards;
+		var invobjtrans = invert(objtrans);
+		if (current_object == i) {
+			objtrans = mult(objtrans, current_transform.forwards);
+			invobjtrans = mult(current_transform.reverse, invobjtrans);
+		}
+		
+		if (objects[i].is_light) {
+			test_light_pos = [	0, 0, 0, 1,
+								0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0];
+			test_light_pos = mult(test_light_pos, objtrans);
+			test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
+		}
+		if (typeof objects[i].test != "undefined") {
+			var relative_pos = test_light_pos;
+			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
+							0, 0, 0, 0,
+							0, 0, 0, 0,
+							0, 0, 0, 0];
+			relative_pos = mult(relative_pos, invobjtrans);
+			relative_pos = {x: relative_pos[0], y: relative_pos[1], z: relative_pos[2]};
+			var s_dat = makeSilhouette(shark_coords, shark_polys, relative_pos);
+			
+			num_vol_vertices = s_dat.size;
+			
+			//set up vertex attributes
+			//console.log(s_dat.data.length-s_dat.size*3);
+			
+			gl.disableVertexAttribArray(vPosition);
+			gl.disableVertexAttribArray(vNormal);
+			
+			gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
+			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.data);
+			gl.vertexAttribPointer(svPosition, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(svPosition);
+			gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
+			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.side);
+			gl.vertexAttribPointer(svSide, 1, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(svSide);
+			
+			
+			gl.cullFace(gl.FRONT);
+			gl.useProgram(vol_prog);
+			gl.uniformMatrix4fv(vview_loc, false, perspective);
+			gl.uniformMatrix4fv(vobj_loc, false, objtrans);
+			gl.uniformMatrix4fv(vntrans_loc, false, transpose(invobjtrans));
+			gl.uniform3fv(vlight_loc, new Float32Array([test_light_pos.x, test_light_pos.y, test_light_pos.z]));
+			
+			//gl.uniform1f(vtest_loc, testval());
+			
+			//draw with the specified attributes and program
+			gl.drawArrays(gl.TRIANGLES, 0, num_vol_vertices);
+		}
+	}
+	
+	
+	gl.stencilOp(gl.KEEP, gl.DECR, gl.KEEP);
 	
 	for (var i in objects) {
 		//Set up transformation for the active object
@@ -488,7 +569,32 @@ function display() {
 	
 	gl.colorMask(true, true, true, true);
 	gl.disable(gl.DEPTH_TEST);
+	gl.disable(gl.CULL_FACE);
 	
+	gl.disableVertexAttribArray(vPosition);
+	gl.disableVertexAttribArray(vNormal);
+	gl.disableVertexAttribArray(svPosition);
+	gl.disableVertexAttribArray(svNormal);
+	gl.disableVertexAttribArray(svSide);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, scrbuffer);
+	gl.vertexAttribPointer(scrbuffer, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(scrbuffer);
+	
+	gl.useProgram(scr_prog);
+	
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.enable(gl.BLEND);
+	
+	gl.stencilOp(gl.ZERO, gl.ZERO, gl.ZERO);
+	
+	gl.stencilFunc(gl.LESS, 0, 0xFF);
+	
+	gl.drawArrays(gl.TRIANGLES, 0, 6);
+	
+	
+	gl.disableVertexAttribArray(scrbuffer);
+	gl.disable(gl.BLEND);
 	//IMPORTANT
 	//right now we only do one render, we need to do it twice though
 	//see https://en.wikipedia.org/wiki/Shadow_volume under Depth Fail
@@ -498,6 +604,8 @@ function display() {
 	//the stencil will cut out all the parts we dont want
 	
 	gl.enable(gl.DEPTH_TEST);
+	gl.disable(gl.STENCIL_TEST);
+	gl.enable(gl.CULL_FACE);
 	gl.depthMask(true);
 	
 	
