@@ -280,7 +280,9 @@ function initObjects(){
 	}*/
 	
 	objects.push({
-			matrix: createObjectTransform([	{type: "s", x: 1000, y: 1000, z: 1000},
+			matrix: createObjectTransform([	{type: "rx", r: 0.06},
+											{type: "ry", r: 0.04},
+											{type: "s", x: 1000, y: 1000, z: 1000},
 											{type: "t", x: 0, y: -50, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
@@ -288,7 +290,9 @@ function initObjects(){
 	});
 	
 	objects.push({
-			matrix: createObjectTransform([	{type: "s", x: 20, y: 20, z: 20},
+			matrix: createObjectTransform([	{type: "rx", r: 0.04},
+											{type: "ry", r: 0.06},
+											{type: "s", x: 20, y: 20, z: 20},
 											{type: "t", x: 0, y: 0, z:-10}]),
 			cast_shadows: true,
 			is_light: false,
