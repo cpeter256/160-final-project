@@ -308,6 +308,17 @@ function initObjects(){
 	
 	objects.push({
 			matrix: createObjectTransform([	{type: "rx", r: 0.04},
+											{type: "ry", r: 0.15},
+											{type: "s", x: 20, y: 20, z: 20},
+											{type: "t", x: 30, y: 0, z:-8}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: false,
+			test: true
+	});
+
+	objects.push({
+			matrix: createObjectTransform([	{type: "rx", r: 0.04},
 											{type: "ry", r: 0.06},
 											{type: "s", x: 20, y: 20, z: 20},
 											{type: "t", x: 0, y: 0, z:-10}]),
