@@ -44,11 +44,14 @@ function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far) {
 	var f = Math.tan((Math.PI-fov)/2);
 	var range_inv = 1/(near-far);
 	
-	view = mult(view,[
+	var p_trans = [
 						f*aspect, 0, 0, 0,
 						0, f, 0, 0,
 						0, 0, (near + far)*range_inv, -1,
-						0, 0, near*far*2*range_inv, 0]);
+						0, 0, near*far*2*range_inv, 0];
+	//TODO: optional oblique near plane clip
+	
+	view = mult(view, p_trans);
 	
 	return view;
 }
