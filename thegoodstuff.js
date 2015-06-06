@@ -304,7 +304,8 @@ function initObjects(){
 											{type: "t", x: 0, y: -50, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
-			is_floor: true
+			is_floor: true,
+			is_mirror: false
 	});
 	
 	objects.push({
@@ -315,6 +316,7 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: false,
+			is_mirror: false,
 			test: true
 	});
 
@@ -325,6 +327,7 @@ function initObjects(){
 										]),
 		cast_shadows: false,
 		is_floor: false,
+		is_mirror: false,
 		is_light: true
 	});
 		
@@ -472,6 +475,7 @@ function display() {
 			relative_pos = mult(relative_pos, invobjtrans);
 			relative_pos = {x: relative_pos[0], y: relative_pos[1], z: relative_pos[2]};
 			var s_dat = makeSilhouette(shark_coords, shark_polys, relative_pos);
+			objects[i].vol_cache = s_dat;
 			
 			num_vol_vertices = s_dat.size;
 			
@@ -517,7 +521,7 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
-		
+		/*
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
 								0, 0, 0, 0,
@@ -525,7 +529,7 @@ function display() {
 								0, 0, 0, 0];
 			test_light_pos = mult(test_light_pos, objtrans);
 			test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
-		}
+		}*/
 		if (typeof objects[i].test != "undefined") {
 			var relative_pos = test_light_pos;
 			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
@@ -534,7 +538,7 @@ function display() {
 							0, 0, 0, 0];
 			relative_pos = mult(relative_pos, invobjtrans);
 			relative_pos = {x: relative_pos[0], y: relative_pos[1], z: relative_pos[2]};
-			var s_dat = makeSilhouette(shark_coords, shark_polys, relative_pos);
+			var s_dat = objects[i].vol_cache; //makeSilhouette(shark_coords, shark_polys, relative_pos);
 			
 			num_vol_vertices = s_dat.size;
 			
@@ -545,11 +549,11 @@ function display() {
 			gl.disableVertexAttribArray(vNormal);
 			
 			gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
-			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.data);
+			//gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.data);
 			gl.vertexAttribPointer(svPosition, 3, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svPosition);
 			gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
-			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.side);
+			//gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.side);
 			gl.vertexAttribPointer(svSide, 1, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svSide);
 			
