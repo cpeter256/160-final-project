@@ -374,9 +374,25 @@ function display() {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+	drawObjects(identity(), identity(), true, false);
+	
+	//We're drawing again soon!
+	window.requestAnimationFrame(display);
+}
+
+function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
 	gl.enable(gl.CULL_FACE);
+	
+	var FRONT_CULL = gl.FRONT;
+	var BACK_CULL = gl.BACK;
+	
+	if (inv_winding) {
+		FRONT_CULL = gl.BACK;
+		BACK_CULL = gl.FRONT;
+	}
 	
 	for (var i in objects) {
 		//Set up transformation for the active object
@@ -387,6 +403,10 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
+		objtrans = mult(objtrans, obj_mod);
+		invobjtrans = invert(objtrans);
+		
+		gl.cullFace(BACK_CULL);
 		
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
@@ -399,57 +419,57 @@ function display() {
 				
 		gl.enable(gl.DEPTH_TEST);
 		//Use the stencil shader
-		gl.useProgram(pick_prog);
-		gl.uniformMatrix4fv(pobj_loc, false, objtrans);
-		gl.uniformMatrix4fv(pview_loc, false, perspective);
-		//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(objects[i].reverse), perspective));
-		gl.uniform1i(pickid_loc, i);
-		//Use the stencil framebuffer
-		gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
-		
-		//Set the viewport
-		gl.viewport(0, 0, canvas.width, canvas.height);
-		
-		if (objects[i].is_floor || objects[i].is_mirror) {
-			//set up vertex attributes
-			gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
-			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vPosition);
-			gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
-			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vNormal);
-		} else {
-			//set up vertex attributes
-			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vPosition);
-			gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vNormal);
-		}
-		
-		if (!objects[i].is_floor) {
-			//Draw the picking stencil
-			if (objects[i].is_mirror) {
-				gl.disable(gl.CULL_FACE);
-				gl.drawArrays(gl.TRIANGLES, 0, 6);
-				gl.enable(gl.CULL_FACE);
+		if (do_pick) {
+			gl.useProgram(pick_prog);
+			gl.uniformMatrix4fv(pobj_loc, false, objtrans);
+			gl.uniformMatrix4fv(pview_loc, false, perspective);
+			//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(objects[i].reverse), perspective));
+			gl.uniform1i(pickid_loc, i);
+			//Use the stencil framebuffer
+			gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
+			
+			//Set the viewport
+			gl.viewport(0, 0, canvas.width, canvas.height);
+			
+			if (objects[i].is_floor || objects[i].is_mirror) {
+				//set up vertex attributes
+				gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
+				gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vPosition);
+				gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
+				gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vNormal);
 			} else {
-				gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+				//set up vertex attributes
+				gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+				gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vPosition);
+				gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+				gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vNormal);
 			}
+			
+			if (!objects[i].is_floor) {
+				//Draw the picking stencil
+				if (objects[i].is_mirror) {
+					gl.disable(gl.CULL_FACE);
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+					gl.enable(gl.CULL_FACE);
+				} else {
+					gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+				}
+			}
+			
+			//Unbind the framebuffer so we draw to the device now
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		}
-		
-		//Unbind the framebuffer so we draw to the device now
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		
 		//Enable depth test
 		gl.enable(gl.DEPTH_TEST);
 		
 		//set the display viewport
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
-		//Set the shader to be used		
-		gl.cullFace(gl.BACK);
+		//Set the shader to be used	
 		gl.useProgram(shark_prog);
 		gl.uniformMatrix4fv(obj_loc, false, objtrans);
 		gl.uniformMatrix4fv(view_loc, false, perspective);
@@ -478,7 +498,7 @@ function display() {
 	gl.clearStencil(0x00000000);
 	gl.clear(gl.STENCIL_BUFFER_BIT);
 	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
-	gl.cullFace(gl.FRONT);
+	gl.cullFace(FRONT_CULL);
 	gl.stencilOp(gl.KEEP, gl.INCR, gl.KEEP);
 	
 	for (var i in objects) {
@@ -490,6 +510,8 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
+		objtrans = mult(objtrans, obj_mod);
+		invobjtrans = invert(objtrans);
 		
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
@@ -528,7 +550,7 @@ function display() {
 			gl.enableVertexAttribArray(svSide);
 			
 			
-			gl.cullFace(gl.FRONT);
+			gl.cullFace(FRONT_CULL);
 			gl.useProgram(vol_prog);
 			gl.uniformMatrix4fv(vview_loc, false, perspective);
 			gl.uniformMatrix4fv(vobj_loc, false, objtrans);
@@ -554,6 +576,9 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
+		objtrans = mult(objtrans, obj_mod);
+		invobjtrans = invert(objtrans);
+		
 		/*
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
@@ -591,7 +616,7 @@ function display() {
 			gl.enableVertexAttribArray(svSide);
 			
 			
-			gl.cullFace(gl.BACK);
+			gl.cullFace(BACK_CULL);
 			gl.useProgram(vol_prog);
 			gl.uniformMatrix4fv(vview_loc, false, perspective);
 			gl.uniformMatrix4fv(vobj_loc, false, objtrans);
@@ -645,10 +670,6 @@ function display() {
 	gl.disable(gl.STENCIL_TEST);
 	gl.enable(gl.CULL_FACE);
 	gl.depthMask(true);
-	
-	
-	//We're drawing again soon!
-	window.requestAnimationFrame(display);
 }
 
 //Load assets before we set up
