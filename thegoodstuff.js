@@ -1,7 +1,8 @@
 //Colin Peter cypeter@ucsc.edu
-//5/12/15
-//Prog 3
-//Creates multiple manipulable sharks
+//Nikita Sokolnikov nsokolni@ucsc.edu
+//6/6/15
+//Final Project
+//Implements shadow volumes and a mirror
 
 "use strict";
 
@@ -297,44 +298,58 @@ function initObjects(){
 	}*/
 	
 	objects.push({
-			matrix: createObjectTransform([	{type: "rx", r: 0.06},
-											{type: "ry", r: 0.04},
-											{type: "s", x: 1000, y: 1000, z: 1000},
-											{type: "t", x: 0, y: -50, z: 0}]),
-			cast_shadows: true,
-			is_light: false,
-			is_floor: true
-	});
-	
-	objects.push({
-			matrix: createObjectTransform([	{type: "rx", r: 0.04},
-											{type: "ry", r: 0.15},
-											{type: "s", x: 20, y: 20, z: 20},
-											{type: "t", x: 30, y: 0, z:-8}]),
+			matrix: createObjectTransform([{type: "s", x: 50, y: 50, z: 50},
+											{type: "rz", r: -Math.PI*.48},
+											{type: "t", x: -50, y: 0, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
 			is_floor: false,
-			test: true
+			is_mirror: true
 	});
-
+	
 	objects.push({
-			matrix: createObjectTransform([	{type: "rx", r: 0.04},
-											{type: "ry", r: 0.06},
+			matrix: createObjectTransform([{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: 0, y: -50, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true,
+			is_mirror: false
+	});
+	
+	objects.push({
+
+			matrix: createObjectTransform([	{type: "rx", r: -0.1},
+											{type: "ry", r: 0.1},
 											{type: "s", x: 20, y: 20, z: 20},
 											{type: "t", x: 0, y: 0, z:-10}]),
 			cast_shadows: true,
 			is_light: false,
 			is_floor: false,
+			is_mirror: false,
+			test: true
+	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rx", r: 0.1},
+											{type: "ry", r: -0.2},
+											{type: "s", x: 20, y: 20, z: 20},
+											{type: "t", x: 25, y: 0, z:-10}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: false,
+			is_mirror: false,
 			test: true
 	});
 
 	objects.push({
-		matrix: createObjectTransform([	{type: "s", x: 20, y: 20, z: 20},
+		matrix: createObjectTransform([	{type: "rx", r: 0.1},
+										{type: "ry", r: -0.1},
+										{type: "s", x: 20, y: 20, z: 20},
 										{type: "s", x: .4, y: .4, z: .4},
 										{type: "t", x: 0, y: 0, z: 25}
 										]),
 		cast_shadows: false,
 		is_floor: false,
+		is_mirror: false,
 		is_light: true
 	});
 		
@@ -360,9 +375,25 @@ function display() {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+	drawObjects(identity(), identity(), true, false);
+	
+	//We're drawing again soon!
+	window.requestAnimationFrame(display);
+}
+
+function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
 	gl.enable(gl.CULL_FACE);
+	
+	var FRONT_CULL = gl.FRONT;
+	var BACK_CULL = gl.BACK;
+	
+	if (inv_winding) {
+		FRONT_CULL = gl.BACK;
+		BACK_CULL = gl.FRONT;
+	}
 	
 	for (var i in objects) {
 		//Set up transformation for the active object
@@ -373,6 +404,10 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
+		objtrans = mult(objtrans, obj_mod);
+		invobjtrans = invert(objtrans);
+		
+		gl.cullFace(BACK_CULL);
 		
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
@@ -385,58 +420,70 @@ function display() {
 				
 		gl.enable(gl.DEPTH_TEST);
 		//Use the stencil shader
-		gl.useProgram(pick_prog);
-		gl.uniformMatrix4fv(pobj_loc, false, objtrans);
-		gl.uniformMatrix4fv(pview_loc, false, perspective);
-		//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(objects[i].reverse), perspective));
-		gl.uniform1i(pickid_loc, i);
-		//Use the stencil framebuffer
-		gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
-		
-		//Set the viewport
-		gl.viewport(0, 0, canvas.width, canvas.height);
-		
-		if (objects[i].is_floor) {
-			//set up vertex attributes
-			gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
-			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vPosition);
-			gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
-			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vNormal);
-		} else {
-			//set up vertex attributes
-			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vPosition);
-			gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-			gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(vNormal);
+		if (do_pick) {
+			gl.useProgram(pick_prog);
+			gl.uniformMatrix4fv(pobj_loc, false, objtrans);
+			gl.uniformMatrix4fv(pview_loc, false, perspective);
+			//gl.uniformMatrix4fv(pntrans_loc, false,  mult(transpose(objects[i].reverse), perspective));
+			gl.uniform1i(pickid_loc, i);
+			//Use the stencil framebuffer
+			gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
+			
+			//Set the viewport
+			gl.viewport(0, 0, canvas.width, canvas.height);
+			
+			if (objects[i].is_floor || objects[i].is_mirror) {
+				//set up vertex attributes
+				gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
+				gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vPosition);
+				gl.bindBuffer(gl.ARRAY_BUFFER, floornbuffer);
+				gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vNormal);
+			} else {
+				//set up vertex attributes
+				gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+				gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vPosition);
+				gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+				gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(vNormal);
+			}
+			
+			if (!objects[i].is_floor) {
+				//Draw the picking stencil
+				if (objects[i].is_mirror) {
+					gl.disable(gl.CULL_FACE);
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+					gl.enable(gl.CULL_FACE);
+				} else {
+					gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+				}
+			}
+			
+			//Unbind the framebuffer so we draw to the device now
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		}
-		
-		if (!objects[i].is_floor) {
-			//Draw the picking stencil
-			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
-		}
-		
-		//Unbind the framebuffer so we draw to the device now
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		
 		//Enable depth test
 		gl.enable(gl.DEPTH_TEST);
 		
 		//set the display viewport
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
-		//Set the shader to be used		
-		gl.cullFace(gl.BACK);
+		//Set the shader to be used	
 		gl.useProgram(shark_prog);
 		gl.uniformMatrix4fv(obj_loc, false, objtrans);
 		gl.uniformMatrix4fv(view_loc, false, perspective);
 		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
 
-		if (objects[i].is_floor) {
+		if (objects[i].is_floor || objects[i].is_mirror) {
+			if (objects[i].is_mirror) {
+				gl.disable(gl.CULL_FACE);
+			}
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
+			if (objects[i].is_mirror) {
+				gl.enable(gl.CULL_FACE);
+			}
 		} else {
 			//draw with the specified attributes and program
 			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
@@ -452,7 +499,7 @@ function display() {
 	gl.clearStencil(0x00000000);
 	gl.clear(gl.STENCIL_BUFFER_BIT);
 	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
-	gl.cullFace(gl.FRONT);
+	gl.cullFace(FRONT_CULL);
 	gl.stencilOp(gl.KEEP, gl.INCR, gl.KEEP);
 	
 	for (var i in objects) {
@@ -464,6 +511,8 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
+		objtrans = mult(objtrans, obj_mod);
+		invobjtrans = invert(objtrans);
 		
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
@@ -482,6 +531,7 @@ function display() {
 			relative_pos = mult(relative_pos, invobjtrans);
 			relative_pos = {x: relative_pos[0], y: relative_pos[1], z: relative_pos[2]};
 			var s_dat = makeSilhouette(shark_coords, shark_polys, relative_pos);
+			objects[i].vol_cache = s_dat;
 			
 			num_vol_vertices = s_dat.size;
 			
@@ -501,7 +551,7 @@ function display() {
 			gl.enableVertexAttribArray(svSide);
 			
 			
-			gl.cullFace(gl.FRONT);
+			gl.cullFace(FRONT_CULL);
 			gl.useProgram(vol_prog);
 			gl.uniformMatrix4fv(vview_loc, false, perspective);
 			gl.uniformMatrix4fv(vobj_loc, false, objtrans);
@@ -527,7 +577,10 @@ function display() {
 			objtrans = mult(objtrans, current_transform.forwards);
 			invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
+		objtrans = mult(objtrans, obj_mod);
+		invobjtrans = invert(objtrans);
 		
+		/*
 		if (objects[i].is_light) {
 			test_light_pos = [	0, 0, 0, 1,
 								0, 0, 0, 0,
@@ -535,7 +588,7 @@ function display() {
 								0, 0, 0, 0];
 			test_light_pos = mult(test_light_pos, objtrans);
 			test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
-		}
+		}*/
 		if (typeof objects[i].test != "undefined") {
 			var relative_pos = test_light_pos;
 			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
@@ -544,7 +597,7 @@ function display() {
 							0, 0, 0, 0];
 			relative_pos = mult(relative_pos, invobjtrans);
 			relative_pos = {x: relative_pos[0], y: relative_pos[1], z: relative_pos[2]};
-			var s_dat = makeSilhouette(shark_coords, shark_polys, relative_pos);
+			var s_dat = objects[i].vol_cache; //makeSilhouette(shark_coords, shark_polys, relative_pos);
 			
 			num_vol_vertices = s_dat.size;
 			
@@ -564,7 +617,7 @@ function display() {
 			gl.enableVertexAttribArray(svSide);
 			
 			
-			gl.cullFace(gl.BACK);
+			gl.cullFace(BACK_CULL);
 			gl.useProgram(vol_prog);
 			gl.uniformMatrix4fv(vview_loc, false, perspective);
 			gl.uniformMatrix4fv(vobj_loc, false, objtrans);
@@ -618,10 +671,6 @@ function display() {
 	gl.disable(gl.STENCIL_TEST);
 	gl.enable(gl.CULL_FACE);
 	gl.depthMask(true);
-	
-	
-	//We're drawing again soon!
-	window.requestAnimationFrame(display);
 }
 
 //Load assets before we set up
