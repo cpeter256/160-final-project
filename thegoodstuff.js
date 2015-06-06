@@ -414,12 +414,27 @@ function display() {
 	gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
 	gl.stencilFunc(gl.NOTEQUAL, 0x00, 0x80);
 	gl.clear(gl.DEPTH_BUFFER_BIT);
-	drawObjects([
-		-1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	], identity(), true, true, false);
+	var mirror_matrix;
+	//find mirror matrix
+	for(var i = 0; i < objects.length; i++){
+		if(objects[i].is_mirror){
+			mirror_matrix = objects[i].matrix;
+			if (i == current_object) {
+				mirror_matrix = {forwards:
+					mult(mirror_matrix.forwards, current_transform.forwards)
+				};
+			}
+			break;
+		}
+		
+	}
+	if(!mirror_matrix){console.log("bad things are happening");}
+//	console.log(reflectMirror(mirror_matrix));
+	drawObjects(reflectMirror(mirror_matrix), identity(), true, true, false);
+//	drawObjects([-1, 0, 0, 0,
+//				0, 1, 0, 0,
+//				0, 0, 1, 0,
+//				0, 0, 0, 1], identity(), true, true, false);
 	gl.disable(gl.STENCIL_TEST);
 
 
@@ -427,7 +442,35 @@ function display() {
 	window.requestAnimationFrame(display);
 }
 
-//function reflectMirror()
+
+
+function reflectMirror(mirror_matrix){
+	var normal_matrix = transpose(invert(mirror_matrix.forwards));	
+	var transformed_normal = mult( 
+								[	0, 1, 0, 0, 
+									0, 0, 0, 0,
+									0, 0, 0, 0,
+									0, 0, 0, 0, ], normal_matrix);	
+
+	transformed_normal = {
+		x: transformed_normal[0],
+		y: transformed_normal[1],
+		z: transformed_normal[2]
+	};
+//	transformed_normal = {x: 1, y: 0, z: 0};
+	transformed_normal = normalize(transformed_normal);
+//	console.log(transformed_normal);
+	var result = [
+		transformed_normal.x*transformed_normal.x, 0, 0, 0,
+		0, transformed_normal.y*transformed_normal.y, 0, 0,
+		0, 0, transformed_normal.z*transformed_normal.z, 0,
+		0, 0, 0, 0
+	];
+	result = scale(result, -2);
+	result = add(identity(), result);
+//	console.log(result);
+	return result;
+}
 
 function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -446,14 +489,15 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 		//Set up transformation for the active object
 		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
 		var objtrans = objects[i].matrix.forwards;
-		var invobjtrans = invert(objtrans);
+		var invobjtrans;// = invert(objtrans);
 		if (current_object == i) {
 			objtrans = mult(objtrans, current_transform.forwards);
-			invobjtrans = mult(current_transform.reverse, invobjtrans);
+			//invobjtrans = mult(current_transform.reverse, invobjtrans);
 		}
 		objtrans = mult(objtrans, obj_mod);
+//		console.log("objtrans: " + objtrans);
 		invobjtrans = invert(objtrans);
-		
+//		if(!invobjtrans){console.log("sad");}
 		gl.cullFace(BACK_CULL);
 		
 		if (objects[i].is_light) {

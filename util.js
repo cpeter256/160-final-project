@@ -418,7 +418,8 @@ function invert(M_orig){
             //get the new diagonal
             e = C[i][i];
             //if it's still 0, not invertable (error)
-            if(e==0){return}
+            if(e==0){console.log("matrix not invertible");
+            	return}
         }
         
         // Scale this row down by e (so we have a 1 on the diagonal)
@@ -531,7 +532,11 @@ function transpose(A) {
 	var R = new Float32Array(16);
 	for (var x = 0; x < 4; ++x) {
 		for (var y = 0; y < 4; ++y) {
-			R[x*4 + y] = A[y*4 + x];
+//			try{
+				R[x*4 + y] = A[y*4 + x];
+//			}catch(e){
+//				console.log(e.stack);
+//			}
 		}
 	}
 	return R;
