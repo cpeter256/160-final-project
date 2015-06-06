@@ -298,6 +298,16 @@ function initObjects(){
 	}*/
 	
 	objects.push({
+			matrix: createObjectTransform([{type: "s", x: 50, y: 50, z: 50},
+											{type: "rz", r: -Math.PI*.48},
+											{type: "t", x: -50, y: 0, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: false,
+			is_mirror: true
+	});
+	
+	objects.push({
 			matrix: createObjectTransform([{type: "s", x: 1000, y: 1000, z: 1000},
 											{type: "t", x: 0, y: -50, z: 0}]),
 			cast_shadows: true,
@@ -400,7 +410,7 @@ function display() {
 		//Set the viewport
 		gl.viewport(0, 0, canvas.width, canvas.height);
 		
-		if (objects[i].is_floor) {
+		if (objects[i].is_floor || objects[i].is_mirror) {
 			//set up vertex attributes
 			gl.bindBuffer(gl.ARRAY_BUFFER, floorbuffer);
 			gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
@@ -420,7 +430,13 @@ function display() {
 		
 		if (!objects[i].is_floor) {
 			//Draw the picking stencil
-			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+			if (objects[i].is_mirror) {
+				gl.disable(gl.CULL_FACE);
+				gl.drawArrays(gl.TRIANGLES, 0, 6);
+				gl.enable(gl.CULL_FACE);
+			} else {
+				gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
+			}
 		}
 		
 		//Unbind the framebuffer so we draw to the device now
@@ -439,8 +455,14 @@ function display() {
 		gl.uniformMatrix4fv(view_loc, false, perspective);
 		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
 
-		if (objects[i].is_floor) {
+		if (objects[i].is_floor || objects[i].is_mirror) {
+			if (objects[i].is_mirror) {
+				gl.disable(gl.CULL_FACE);
+			}
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
+			if (objects[i].is_mirror) {
+				gl.enable(gl.CULL_FACE);
+			}
 		} else {
 			//draw with the specified attributes and program
 			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
