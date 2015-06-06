@@ -328,6 +328,7 @@ function initObjects(){
 			is_mirror: false,
 			test: true
 	});
+	/*
 	objects.push({
 			matrix: createObjectTransform([	{type: "rx", r: 0.1},
 											{type: "ry", r: -0.2},
@@ -339,7 +340,7 @@ function initObjects(){
 			is_mirror: false,
 			test: true
 	});
-
+*/
 	objects.push({
 		matrix: createObjectTransform([	{type: "rx", r: 0.1},
 										{type: "ry", r: -0.1},
@@ -376,13 +377,28 @@ function display() {
 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
-	drawObjects(identity(), identity(), true, false);
-	
+	gl.clearStencil(0x00000000);
+	gl.clear(gl.STENCIL_BUFFER_BIT);
+	drawObjects(identity(), identity(), true, false, true);
+	gl.enable(gl.STENCIL_TEST);
+	gl.stencilMask(0x100);
+	gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+	gl.stencilFunc(gl.EQUAL, 0x100, 0x100);
+//	gl.clear(gl.DEPTH_BUFFER_BIT);
+	drawObjects([
+		-1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	], identity(), true, true, false);
+	gl.disable(gl.STENCIL_TEST);
+
+
 	//We're drawing again soon!
 	window.requestAnimationFrame(display);
 }
 
-function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
+function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
 	gl.enable(gl.CULL_FACE);
@@ -478,27 +494,34 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
 
 		if (objects[i].is_floor || objects[i].is_mirror) {
 			if (objects[i].is_mirror) {
-				gl.disable(gl.CULL_FACE);
-			}
-			gl.drawArrays(gl.TRIANGLES, 0, 6);
-			if (objects[i].is_mirror) {
-				gl.enable(gl.CULL_FACE);
+				if(draw_mirrors){
+					gl.disable(gl.CULL_FACE);
+					gl.enable(gl.STENCIL_TEST);
+					gl.stencilFunc(gl.ALWAYS, 0x100, 0x100);
+					gl.stencilMask(0x100);
+					gl.stencilOp(gl.KEEP, gl.REPLACE, gl.REPLACE);
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+					gl.enable(gl.CULL_FACE);
+					gl.disable(gl.STENCIL_TEST);			
+				}
+			} else{
+				gl.drawArrays(gl.TRIANGLES, 0, 6);
 			}
 		} else {
 			//draw with the specified attributes and program
 			gl.drawArrays(gl.TRIANGLES, 0, num_vertices);
 		}
 		
-			
 		
 	}
-	
+	/*
 	gl.colorMask(false, false, false, false);
 	gl.depthMask(false);
 	gl.enable(gl.STENCIL_TEST);
-	gl.clearStencil(0x00000000);
-	gl.clear(gl.STENCIL_BUFFER_BIT);
+//	gl.clearStencil(0x00000000);
+//	gl.clear(gl.STENCIL_BUFFER_BIT);
 	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
+	gl.stencilMask(0xFF);
 	gl.cullFace(FRONT_CULL);
 	gl.stencilOp(gl.KEEP, gl.INCR, gl.KEEP);
 	
@@ -580,15 +603,15 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
 		objtrans = mult(objtrans, obj_mod);
 		invobjtrans = invert(objtrans);
 		
-		/*
-		if (objects[i].is_light) {
-			test_light_pos = [	0, 0, 0, 1,
-								0, 0, 0, 0,
-								0, 0, 0, 0,
-								0, 0, 0, 0];
-			test_light_pos = mult(test_light_pos, objtrans);
-			test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
-		}*/
+		
+		//if (objects[i].is_light) {
+			//test_light_pos = [	0, 0, 0, 1,
+				//				0, 0, 0, 0,
+					//			0, 0, 0, 0,
+						//		0, 0, 0, 0];
+//			test_light_pos = mult(test_light_pos, objtrans);
+	//		test_light_pos = {x: test_light_pos[0], y: test_light_pos[1], z: test_light_pos[2]};
+		//}
 		if (typeof objects[i].test != "undefined") {
 			var relative_pos = test_light_pos;
 			relative_pos = [test_light_pos.x, test_light_pos.y, test_light_pos.z, 1,
@@ -653,8 +676,8 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
 	gl.stencilOp(gl.ZERO, gl.ZERO, gl.ZERO);
 	
 	gl.stencilFunc(gl.LESS, 0, 0xFF);
-	
-	gl.drawArrays(gl.TRIANGLES, 0, 6);
+//enable shadows	
+//	gl.drawArrays(gl.TRIANGLES, 0, 6);
 	
 	
 	gl.disableVertexAttribArray(scrbuffer);
@@ -671,6 +694,7 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding) {
 	gl.disable(gl.STENCIL_TEST);
 	gl.enable(gl.CULL_FACE);
 	gl.depthMask(true);
+	*/
 }
 
 //Load assets before we set up
