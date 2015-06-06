@@ -298,16 +298,6 @@ function initObjects(){
 	}*/
 	
 	objects.push({
-			matrix: createObjectTransform([{type: "s", x: 50, y: 50, z: 50},
-											{type: "rz", r: -Math.PI*.48},
-											{type: "t", x: -50, y: 0, z: 0}]),
-			cast_shadows: true,
-			is_light: false,
-			is_floor: false,
-			is_mirror: true
-	});
-	
-	objects.push({
 			matrix: createObjectTransform([{type: "s", x: 1000, y: 1000, z: 1000},
 											{type: "t", x: 0, y: -50, z: 0}]),
 			cast_shadows: true,
@@ -352,6 +342,16 @@ function initObjects(){
 		is_floor: false,
 		is_mirror: false,
 		is_light: true
+	});
+	
+		objects.push({
+			matrix: createObjectTransform([{type: "s", x: 50, y: 50, z: 50},
+											{type: "rz", r: -Math.PI*.48},
+											{type: "t", x: 0, y: 0, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: false,
+			is_mirror: true
 	});
 		
 }
@@ -426,6 +426,8 @@ function display() {
 	//We're drawing again soon!
 	window.requestAnimationFrame(display);
 }
+
+//function reflectMirror()
 
 function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -528,7 +530,7 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 					gl.enable(gl.STENCIL_TEST);
 					gl.stencilFunc(gl.ALWAYS, 0xFF, 0x80);
 					gl.stencilMask(0x80);
-					gl.stencilOp(gl.KEEP, gl.REPLACE, gl.REPLACE);
+					gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
 					gl.drawArrays(gl.TRIANGLES, 0, 6);
 					gl.enable(gl.CULL_FACE);
 					gl.disable(gl.STENCIL_TEST);			
