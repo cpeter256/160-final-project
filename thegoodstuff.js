@@ -298,9 +298,7 @@ function initObjects(){
 	}*/
 	
 	objects.push({
-			matrix: createObjectTransform([	{type: "rx", r: 0.06},
-											{type: "ry", r: 0.04},
-											{type: "s", x: 1000, y: 1000, z: 1000},
+			matrix: createObjectTransform([{type: "s", x: 1000, y: 1000, z: 1000},
 											{type: "t", x: 0, y: -50, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
@@ -309,8 +307,8 @@ function initObjects(){
 	});
 	
 	objects.push({
-			matrix: createObjectTransform([	{type: "rx", r: 0.04},
-											{type: "ry", r: 0.06},
+			matrix: createObjectTransform([	{type: "rx", r: -0.1},
+											{type: "ry", r: 0.1},
 											{type: "s", x: 20, y: 20, z: 20},
 											{type: "t", x: 0, y: 0, z:-10}]),
 			cast_shadows: true,
@@ -319,9 +317,22 @@ function initObjects(){
 			is_mirror: false,
 			test: true
 	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rx", r: 0.1},
+											{type: "ry", r: -0.2},
+											{type: "s", x: 20, y: 20, z: 20},
+											{type: "t", x: 25, y: 0, z:-10}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: false,
+			is_mirror: false,
+			test: true
+	});
 
 	objects.push({
-		matrix: createObjectTransform([	{type: "s", x: 20, y: 20, z: 20},
+		matrix: createObjectTransform([	{type: "rx", r: 0.1},
+										{type: "ry", r: -0.1},
+										{type: "s", x: 20, y: 20, z: 20},
 										{type: "s", x: .4, y: .4, z: .4},
 										{type: "t", x: 0, y: 0, z: 25}
 										]),
@@ -549,11 +560,11 @@ function display() {
 			gl.disableVertexAttribArray(vNormal);
 			
 			gl.bindBuffer(gl.ARRAY_BUFFER, svBuffer);
-			//gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.data);
+			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.data);
 			gl.vertexAttribPointer(svPosition, 3, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svPosition);
 			gl.bindBuffer(gl.ARRAY_BUFFER, svsBuffer);
-			//gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.side);
+			gl.bufferSubData(gl.ARRAY_BUFFER, 0, s_dat.side);
 			gl.vertexAttribPointer(svSide, 1, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(svSide);
 			
