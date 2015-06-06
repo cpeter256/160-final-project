@@ -373,18 +373,47 @@ function display() {
 	//clear the entire framebuffer
 	gl.clearColor(0.1, 0.1, 0.4, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+	gl.clearStencil(0x00);
+	gl.clear(gl.STENCIL_BUFFER_BIT);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, pick_framebuffer);
 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	
-	gl.clearStencil(0x00000000);
-	gl.clear(gl.STENCIL_BUFFER_BIT);
+	gl.colorMask(false, false, false, false);
+	gl.disable(gl.DEPTH_TEST);
+	gl.disable(gl.CULL_FACE);
+	gl.enable(gl.STENCIL_TEST);
+	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
+	gl.stencilMask(0xFF);
+	gl.stencilOp(gl.ZERO, gl.ZERO, gl.ZERO);
+	
+	gl.disableVertexAttribArray(vPosition);
+	gl.disableVertexAttribArray(vNormal);
+	gl.disableVertexAttribArray(svPosition);
+	gl.disableVertexAttribArray(svNormal);
+	gl.disableVertexAttribArray(svSide);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, scrbuffer);
+	gl.vertexAttribPointer(scrbuffer, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(scrbuffer);
+	
+	gl.useProgram(scr_prog);
+	gl.drawArrays(gl.TRIANGLES, 0, 6);
+	
+	gl.colorMask(true, true, true, true);
+	gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.CULL_FACE);
+	gl.disable(gl.STENCIL_TEST);
+	
+	
 	drawObjects(identity(), identity(), true, false, true);
 	gl.enable(gl.STENCIL_TEST);
-	gl.stencilMask(0x100);
+	//gl.stencilMask(0x100);
 	gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
-	gl.stencilFunc(gl.EQUAL, 0x100, 0x100);
-//	gl.clear(gl.DEPTH_BUFFER_BIT);
+	gl.stencilFunc(gl.NOTEQUAL, 0x00, 0x80);
+	gl.clear(gl.DEPTH_BUFFER_BIT);
 	drawObjects([
 		-1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -497,8 +526,8 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 				if(draw_mirrors){
 					gl.disable(gl.CULL_FACE);
 					gl.enable(gl.STENCIL_TEST);
-					gl.stencilFunc(gl.ALWAYS, 0x100, 0x100);
-					gl.stencilMask(0x100);
+					gl.stencilFunc(gl.ALWAYS, 0xFF, 0x80);
+					gl.stencilMask(0x80);
 					gl.stencilOp(gl.KEEP, gl.REPLACE, gl.REPLACE);
 					gl.drawArrays(gl.TRIANGLES, 0, 6);
 					gl.enable(gl.CULL_FACE);
@@ -514,14 +543,14 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 		
 		
 	}
-	/*
+	
 	gl.colorMask(false, false, false, false);
 	gl.depthMask(false);
 	gl.enable(gl.STENCIL_TEST);
 //	gl.clearStencil(0x00000000);
 //	gl.clear(gl.STENCIL_BUFFER_BIT);
 	gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
-	gl.stencilMask(0xFF);
+	gl.stencilMask(0x7F);
 	gl.cullFace(FRONT_CULL);
 	gl.stencilOp(gl.KEEP, gl.INCR, gl.KEEP);
 	
@@ -675,9 +704,9 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 	
 	gl.stencilOp(gl.ZERO, gl.ZERO, gl.ZERO);
 	
-	gl.stencilFunc(gl.LESS, 0, 0xFF);
+	gl.stencilFunc(gl.LESS, 0, 0x7F);
 //enable shadows	
-//	gl.drawArrays(gl.TRIANGLES, 0, 6);
+	gl.drawArrays(gl.TRIANGLES, 0, 6);
 	
 	
 	gl.disableVertexAttribArray(scrbuffer);
@@ -694,7 +723,7 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 	gl.disable(gl.STENCIL_TEST);
 	gl.enable(gl.CULL_FACE);
 	gl.depthMask(true);
-	*/
+	
 }
 
 //Load assets before we set up
