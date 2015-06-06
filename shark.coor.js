@@ -15,7 +15,7 @@ shark_coords = [
 	[-1,-1,1],
 	[-1,-1,-1],
 ];
-console.log("preprocessing shitty shark model...");
+console.log("preprocessing model...");
 
 //this removes duplicate coordinates
 var count = 0;
