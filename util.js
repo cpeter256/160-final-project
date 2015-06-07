@@ -48,16 +48,19 @@ function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far, o
 						f*aspect, 0, 0, 0,
 						0, f, 0, 0,
 						0, 0, (near + far)*range_inv, -1,
-						0, 0, near*far*2*range_inv, 0];
-	//TODO: optional oblique near plane clip
+						0, 0, near*far*2*range_inv, 0];				
+	
+	//var kluge = view;
+	//view = p_trans;
 	view = mult(view, p_trans);
-
+	
+	/*
 	if(oblique_plane){
-//		oblique_plane.x *= -1;
-		// oblique_plane.y *= -1;
-		// oblique_plane.z *= -1;
+		/*oblique_plane.x *= -1;
+		oblique_plane.y *= -1;
+		oblique_plane.z *= -1;*/
 		
-		var mat = [oblique_plane.x, oblique_plane.y, oblique_plane.z, oblique_plane.d,
+		/*var mat = [oblique_plane.x, oblique_plane.y, oblique_plane.z, oblique_plane.d,
 					0,0,0,0,
 					0,0,0,0,
 					0,0,0,0];
@@ -66,6 +69,12 @@ function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far, o
 		oblique_plane.y = mat[1];
 		oblique_plane.z = mat[2];
 		oblique_plane.d = mat[3];
+		
+		oblique_plane.x = 0;
+		oblique_plane.z = -1;
+		oblique_plane.y = 0;
+		oblique_plane.d = -1;
+		
 		var vec = {};
 		vec.x = (sign(oblique_plane.x) + view[2])/view[0];
 		vec.y = (sign(oblique_plane.y) + view[6]/view[5]);
@@ -83,11 +92,14 @@ function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far, o
 		
 		view[8] = vec.x;
 		view[9] = vec.y;
-		view[10] = vec.z;
+		view[10] = vec.z+1;
 		view[11] = vec.d;
 	}
+	//p_trans = view;
+	//view = kluge;
 	
 	
+	//view = mult(view, p_trans);*/
 	return view;
 }
 

@@ -53,6 +53,7 @@ var view_loc;
 var obj_loc;
 var ntrans_loc;
 var campos_loc;
+var plane_loc;
 
 var pview_loc;
 var pobj_loc;
@@ -67,6 +68,7 @@ var vlight_loc;
 
 //transformation matrices
 var perspective;
+var mode_perspective;
 var camdir;
 var objects = [];
 var current_transform;
@@ -256,6 +258,7 @@ function init() {
 	//Set up the view matrix
 	var d = 100/Math.sqrt(3);
 	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000);
+	mode_perspective = perspective;
 	camdir = getCameraDirection(-Math.atan(1/Math.sqrt(2)), Math.PI/4);
 	gl.uniform4fv(campos_loc, new Float32Array([d, d, d, 1]));
 	//perspective = createPerspectiveTransform(0, 0, 100, 0, 0, 0, Math.PI/2, 1, 1000);
@@ -273,6 +276,7 @@ function init() {
 	view_loc = gl.getUniformLocation(shark_prog, "ptransform");
 	obj_loc = gl.getUniformLocation(shark_prog, "transform");
 	campos_loc = gl.getUniformLocation(shark_prog, "campos");
+	plane_loc = gl.getUniformLocation(shark_prog, "plane");
 	
 	//Normal transformation to use
 	ntrans_loc = gl.getUniformLocation(shark_prog, "normal_transform");
@@ -369,7 +373,19 @@ function initObjects(){
 			is_mirror: false,
 			test: true
 	});
-	/*
+	objects.push({
+
+			matrix: createObjectTransform([	{type: "rx", r: -0.1},
+											{type: "ry", r: 0.1},
+											{type: "s", x: 18, y: 18, z: 18},
+											{type: "t", x: 0, y: -10, z:10}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: false,
+			is_mirror: false,
+			test: true
+	});
+	
 	objects.push({
 			matrix: createObjectTransform([	{type: "rx", r: 0.1},
 											{type: "ry", r: -0.2},
@@ -381,13 +397,13 @@ function initObjects(){
 			is_mirror: false,
 			test: true
 	});
-*/
+
 	objects.push({
 		matrix: createObjectTransform([	{type: "rx", r: 0.1},
 										{type: "ry", r: -0.1},
 										{type: "s", x: 20, y: 20, z: 20},
 										{type: "s", x: .4, y: .4, z: .4},
-										{type: "t", x: 0, y: 0, z: 25}
+										{type: "t", x: 0, y: 30, z: 25}
 										]),
 		cast_shadows: false,
 		is_floor: false,
@@ -395,9 +411,9 @@ function initObjects(){
 		is_light: true
 	});
 	
-		objects.push({
+	objects.push({
 			matrix: createObjectTransform([{type: "s", x: 50, y: 50, z: 50},
-											{type: "rz", r: Math.PI*.48},
+											{type: "rz", r: Math.PI*.51},
 											{type: "t", x: 0, y: 0, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
@@ -459,16 +475,10 @@ function display() {
 	gl.disable(gl.STENCIL_TEST);
 
 	//update perspective matrix(ordinary version)
-	var d = 100/Math.sqrt(3);
-	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000);
+	/*var d = 100/Math.sqrt(3);
+	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000);*/
 
-	
-	drawObjects(identity(), identity(), true, false, true);
-	gl.enable(gl.STENCIL_TEST);
-	//gl.stencilMask(0x100);
-	gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
-	gl.stencilFunc(gl.NOTEQUAL, 0x00, 0x80);
-	gl.clear(gl.DEPTH_BUFFER_BIT);
+
 	var mirror_matrix;
 	//find mirror matrix
 	for(var i = 0; i < objects.length; i++){
@@ -483,15 +493,35 @@ function display() {
 		}
 		
 	}
+	var mplane = getMirrorPlane(mirror_matrix);
+	gl.useProgram(shark_prog);
+	gl.uniform4fv(plane_loc, new Float32Array([0, 0, 0, 0]));
+	
+	
+	
+	
+	drawObjects(identity(), identity(), true, false, true);
+	gl.enable(gl.STENCIL_TEST);
+	//gl.stencilMask(0x100);
+	gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+	gl.stencilFunc(gl.NOTEQUAL, 0x00, 0x80);
+	gl.clear(gl.DEPTH_BUFFER_BIT);
+	
 	//update perspective matrix	(oblique version)
 	// counter++;
 	// if(counter > 10){
 		// console.log(getMirrorPlane(mirror_matrix));
 		// counter = 0;
 	// }
-	var d = 100/Math.sqrt(3);
-	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000, getMirrorPlane(mirror_matrix));
+	/*var d = 100/Math.sqrt(3);
+	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000, 
+	{x: 1, y: 0, z: 0, d: 0});//getMirrorPlane(mirror_matrix));*/
 
+
+	gl.useProgram(shark_prog);
+	//gl.uniform4fv(plane_loc, new Float32Array([0, 0, 0, 0]));
+	gl.uniform4fv(plane_loc, new Float32Array([mplane.x, mplane.y, mplane.z, -mplane.d]));
+	
 	
 //	console.log(reflectMirror(mirror_matrix));
 	drawObjects(reflectMirror(mirror_matrix), identity(), true, true, false);

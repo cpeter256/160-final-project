@@ -26,7 +26,7 @@ var transx_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).x;
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos).x;
 	
 	transx_update(canvas_x, canvas_y);
 };
@@ -43,7 +43,7 @@ var transx_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).x;
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos).x;
 	var diff = cur_pos-orig_pos;
 	
 	current_transform = {
@@ -72,7 +72,7 @@ var transy_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).y;
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos).y;
 	
 	transy_update(canvas_x, canvas_y);
 };
@@ -89,7 +89,7 @@ var transy_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).y;
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos).y;
 	var diff = cur_pos-orig_pos;
 	
 	current_transform = {
@@ -118,7 +118,7 @@ var transz_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).z;
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos).z;
 	
 	transz_update(canvas_x, canvas_y);
 };
@@ -135,7 +135,7 @@ var transz_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos).z;
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos).z;
 	var diff = cur_pos-orig_pos;
 	
 	current_transform = {
@@ -164,7 +164,7 @@ var transxy_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	
 	transxy_update(canvas_x, canvas_y);
 };
@@ -180,7 +180,7 @@ var transxy_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var diff = {x: cur_pos.x-orig_pos.x, y: cur_pos.y-orig_pos.y};
 	
 	current_transform = {
@@ -209,7 +209,7 @@ var transyz_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	
 	transyz_update(canvas_x, canvas_y);
 };
@@ -225,7 +225,7 @@ var transyz_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var diff = {y: cur_pos.y-orig_pos.y, z: cur_pos.z-orig_pos.z};
 	
 	current_transform = {
@@ -254,7 +254,7 @@ var transxz_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	
 	transxz_update(canvas_x, canvas_y);
 };
@@ -270,7 +270,7 @@ var transxz_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var diff = {x: cur_pos.x-orig_pos.x, z: cur_pos.z-orig_pos.z};
 	
 	current_transform = {
@@ -299,7 +299,7 @@ var screen_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	
 	screen_update(canvas_x, canvas_y);
 };
@@ -315,7 +315,7 @@ var screen_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var diff = vadd(cur_pos, vscale(orig_pos, -1));
 	
 	current_transform = {
@@ -350,7 +350,7 @@ var scale_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	orig_pos = Math.sqrt(	(orig_pos.x-obj_pos.x)*(orig_pos.x-obj_pos.x) +
 							(orig_pos.y-obj_pos.y)*(orig_pos.y-obj_pos.y) +
 							(orig_pos.z-obj_pos.z)*(orig_pos.z-obj_pos.z));
@@ -371,7 +371,7 @@ var scale_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	cur_pos = Math.sqrt(	(cur_pos.x-obj_pos.x)*(cur_pos.x-obj_pos.x) +
 							(cur_pos.y-obj_pos.y)*(cur_pos.y-obj_pos.y) +
 							(cur_pos.z-obj_pos.z)*(cur_pos.z-obj_pos.z));
@@ -426,7 +426,7 @@ var rotx_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	orig_pos = Math.atan2(orig_pos.y-obj_pos.y, orig_pos.z-obj_pos.z);
 	//console.log(orig_pos*180/Math.PI);
 	
@@ -445,7 +445,7 @@ var rotx_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var theta = Math.atan2(cur_pos.y-obj_pos.y, cur_pos.z-obj_pos.z) - orig_pos;
 	
 	current_transform = {
@@ -467,7 +467,7 @@ var roty_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	orig_pos = Math.atan2(orig_pos.x-obj_pos.x, -(orig_pos.z-obj_pos.z));
 	//console.log(orig_pos*180/Math.PI);
 	
@@ -486,7 +486,7 @@ var roty_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var theta = Math.atan2(cur_pos.x-obj_pos.x, -(cur_pos.z-obj_pos.z)) - orig_pos;
 	
 	current_transform = {
@@ -508,7 +508,7 @@ var rotz_begin = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	orig_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	orig_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	orig_pos = Math.atan2(orig_pos.y-obj_pos.y, orig_pos.x-obj_pos.x);
 	//console.log(orig_pos*180/Math.PI);
 	
@@ -527,7 +527,7 @@ var rotz_update = function(canvas_x, canvas_y) {
 	
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
 	
-	var cur_pos = planeproj(canvas_x, canvas_y, perspective, norm, pos);
+	var cur_pos = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
 	var theta = Math.atan2(cur_pos.y-obj_pos.y, cur_pos.x-obj_pos.x) - orig_pos;
 	
 	current_transform = {
@@ -542,7 +542,7 @@ var screenrot_begin = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, mode_perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -554,7 +554,7 @@ var screenrot_begin = function(canvas_x, canvas_y) {
 	var ocx = (obj_pos.x*aspect + 1)*canvas.width/2;
 	var ocy = (-obj_pos.y + 1)*canvas.height/2;
 	//console.log(ocx, ocy);
-	orig_axis = vadd(planeproj(ocx, ocy, perspective, camdir, 0), vscale(planeproj(ocx, ocy, perspective, camdir, 1), -1));
+	orig_axis = vadd(planeproj(ocx, ocy, mode_perspective, camdir, 0), vscale(planeproj(ocx, ocy, mode_perspective, camdir, 1), -1));
 	
 	screenrot_update(canvas_x, canvas_y);
 };
@@ -563,7 +563,7 @@ var screenrot_update = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, mode_perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -593,7 +593,7 @@ var tumble_begin = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, mode_perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -608,7 +608,7 @@ var tumble_update = function(canvas_x, canvas_y) {
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0];
-	pos = mult(pos, mult(objects[current_object].matrix.forwards, perspective));
+	pos = mult(pos, mult(objects[current_object].matrix.forwards, mode_perspective));
 	pos = {x: pos[0]/pos[3], y: pos[1]/pos[3]};
 	pos.x /= aspect;
 	
@@ -629,8 +629,8 @@ var tumble_update = function(canvas_x, canvas_y) {
 	
 	var norm = camdir;
 	pos = -dot(pos, norm)/Math.sqrt(dot(norm, norm));
-	var cur_pos3 = planeproj(canvas_x, canvas_y, perspective, norm, pos);
-	var orig_pos3 = planeproj(((orig_pos.x*aspect)+1)*canvas.width/2, (-orig_pos.y+1)*canvas.height/2, perspective, norm, pos);
+	var cur_pos3 = planeproj(canvas_x, canvas_y, mode_perspective, norm, pos);
+	var orig_pos3 = planeproj(((orig_pos.x*aspect)+1)*canvas.width/2, (-orig_pos.y+1)*canvas.height/2, mode_perspective, norm, pos);
 	
 	axis = vadd(cur_pos3, vscale(orig_pos3, -1));
 	axis = cross(norm, axis);
