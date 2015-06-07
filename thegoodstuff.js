@@ -81,6 +81,11 @@ var current_mode;
 var mode_begin;
 var mode_update;
 var doing_op = false;
+
+
+//remove this please
+var counter = 0;
+
 function setmode(mode) {
 	if (!doing_op) {
 		current_mode = mode;
@@ -457,17 +462,45 @@ function reflectMirror(mirror_matrix){
 		y: transformed_normal[1],
 		z: transformed_normal[2]
 	};
-//	transformed_normal = {x: 1, y: 0, z: 0};
 	transformed_normal = normalize(transformed_normal);
-//	console.log(transformed_normal);
-	var result = [
-		transformed_normal.x*transformed_normal.x, 0, 0, 0,
-		0, transformed_normal.y*transformed_normal.y, 0, 0,
-		0, 0, transformed_normal.z*transformed_normal.z, 0,
-		0, 0, 0, 0
-	];
+	counter++;
+	if(counter > 10){
+//		console.log(mirror_matrix);
+		counter = 0;
+	}
+	
+	var mirror_pos = mult([	0,0,0,1,
+							0,0,0,0,
+							0,0,0,0,
+							0,0,0,0], mirror_matrix.forwards);
+	var mirror_trans = createObjectTransform([{type: "t", x: -mirror_pos[0], y: -mirror_pos[1], z: -mirror_pos[2]}]);
+	var mirror_inverse = mirror_trans.forwards;
+	var mirror_translate = mirror_trans.reverse;
+
+	var a = transformed_normal.x;
+	var b = transformed_normal.y;
+	var c = transformed_normal.z;
+	
+	var result = [	a*a, a*b, a*c, 0,
+					b*a, b*b, b*c, 0,
+					c*a, c*b, c*c, 0,
+					0, 0, 0, 0
+		];
 	result = scale(result, -2);
 	result = add(identity(), result);
+	
+	result = mult(mirror_inverse, result);
+	result = mult( result, mirror_translate);
+	
+	/*var result;
+	result = [-(a*a) + b*b + c*c, -2*a*b, -2*a*c, 0
+				-2*a*b, a*a-b*b+c*c, -2*b*c, 0,
+				-2*a*c, -2*b*c, a*a+b*b-c*c, 0,
+				0, 0, 0, 1];
+	result = scale(result, 1/(a*a+b*b+c*c));
+	result[15] = 1;
+	*/
+	
 //	console.log(result);
 	return result;
 }
