@@ -255,7 +255,7 @@ function init() {
 	
 	//Set up the view matrix
 	var d = 100/Math.sqrt(3);
-	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI/3, 1, 1000);
+	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000);
 	camdir = getCameraDirection(-Math.atan(1/Math.sqrt(2)), Math.PI/4);
 	gl.uniform4fv(campos_loc, new Float32Array([d, d, d, 1]));
 	//perspective = createPerspectiveTransform(0, 0, 100, 0, 0, 0, Math.PI/2, 1, 1000);
