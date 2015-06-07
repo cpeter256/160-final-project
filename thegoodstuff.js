@@ -302,9 +302,55 @@ function initObjects(){
 		};
 	}*/
 	
+	var box_rad = 100;
 	objects.push({
-			matrix: createObjectTransform([{type: "s", x: 1000, y: 1000, z: 1000},
-											{type: "t", x: 0, y: -50, z: 0}]),
+			matrix: createObjectTransform([	{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: 0, y: -box_rad/2, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true,
+			is_mirror: false
+	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rx", r: Math.PI},
+											{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: 0, y: box_rad, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true,
+			is_mirror: false
+	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rx", r: -Math.PI/2},
+											{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: 0, y: 0, z: -box_rad}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true,
+			is_mirror: false
+	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rx", r: Math.PI/2},
+											{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: 0, y: 0, z: box_rad}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true,
+			is_mirror: false
+	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rz", r: Math.PI/2},
+											{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: box_rad, y: 0, z: 0}]),
+			cast_shadows: true,
+			is_light: false,
+			is_floor: true,
+			is_mirror: false
+	});
+	objects.push({
+			matrix: createObjectTransform([	{type: "rz", r: -Math.PI/2},
+											{type: "s", x: 1000, y: 1000, z: 1000},
+											{type: "t", x: -box_rad, y: 0, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,

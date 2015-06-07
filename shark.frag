@@ -15,7 +15,7 @@ varying vec3 normal;
 varying vec4 worldpos;
 
 void main() {
-	vec3 light = normalize(vec3(1.0, 1.0, 1.0));
+	vec3 light = normalize(vec3(1.2, 1.0, .9));
 	float lum = dot(normalize(normal), light);
 	vec3 reflection = reflect(-light, normalize(normal));
 	
