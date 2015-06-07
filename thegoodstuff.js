@@ -397,7 +397,7 @@ function initObjects(){
 	
 		objects.push({
 			matrix: createObjectTransform([{type: "s", x: 50, y: 50, z: 50},
-											{type: "rz", r: -Math.PI*.48},
+											{type: "rz", r: Math.PI*.48},
 											{type: "t", x: 0, y: 0, z: 0}]),
 			cast_shadows: true,
 			is_light: false,
@@ -649,14 +649,18 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 		if (objects[i].is_floor || objects[i].is_mirror) {
 			if (objects[i].is_mirror) {
 				if(draw_mirrors){
-					gl.disable(gl.CULL_FACE);
+					//gl.disable(gl.CULL_FACE);
 					gl.enable(gl.STENCIL_TEST);
 					gl.stencilFunc(gl.ALWAYS, 0xFF, 0x80);
 					gl.stencilMask(0x80);
 					gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+					gl.cullFace(FRONT_CULL);
 					gl.drawArrays(gl.TRIANGLES, 0, 6);
-					gl.enable(gl.CULL_FACE);
-					gl.disable(gl.STENCIL_TEST);			
+					//gl.enable(gl.CULL_FACE);
+					gl.disable(gl.STENCIL_TEST);
+					gl.cullFace(BACK_CULL);
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+					//gl.cullFace(BACK_CULL);
 				}
 			} else{
 				gl.drawArrays(gl.TRIANGLES, 0, 6);
