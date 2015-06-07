@@ -7,7 +7,7 @@
 //vector/matrix utility functions
 
 //Creates a perspective transformation matrix
-function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far) {
+function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far, oblique_plane) {
 	var view = new Float32Array(4*4);
 	view = identity();
 	
@@ -50,10 +50,58 @@ function createPerspectiveTransform(x, y, z, pitch, yaw, roll, fov, near, far) {
 						0, 0, (near + far)*range_inv, -1,
 						0, 0, near*far*2*range_inv, 0];
 	//TODO: optional oblique near plane clip
-	
 	view = mult(view, p_trans);
+
+	if(oblique_plane){
+//		oblique_plane.x *= -1;
+		// oblique_plane.y *= -1;
+		// oblique_plane.z *= -1;
+		
+		var mat = [oblique_plane.x, oblique_plane.y, oblique_plane.z, oblique_plane.d,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,0,0];
+		mat = mult(mat, transpose(invert(view)));
+		oblique_plane.x = mat[0];
+		oblique_plane.y = mat[1];
+		oblique_plane.z = mat[2];
+		oblique_plane.d = mat[3];
+		var vec = {};
+		vec.x = (sign(oblique_plane.x) + view[2])/view[0];
+		vec.y = (sign(oblique_plane.y) + view[6]/view[5]);
+		vec.z = -1;
+		vec.d = (1+view[10])/view[11];
+		
+		
+		
+		var dotvec = oblique_plane.x*vec.x + oblique_plane.y*vec.y + oblique_plane.z*vec.z + oblique_plane.d*vec.d;
+		var a = 2/dotvec;
+		vec.x *= a;
+		vec.y *= a;
+		vec.z *= a;
+		vec.d *= a;
+		
+		view[8] = vec.x;
+		view[9] = vec.y;
+		view[10] = vec.z;
+		view[11] = vec.d;
+	}
+	
 	
 	return view;
+}
+
+function sign(number){
+	if(typeof number != 'number'){
+		throw "sign: this isn't a number";
+	}
+	
+	if(number > 0) {
+		return 1;	
+	}else if(number < 0){
+		return -1;
+	}else {{{return 0;}}};
+	
 }
 
 //Gets a vector for the direction specified by pitch and yaw

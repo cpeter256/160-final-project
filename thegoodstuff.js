@@ -457,7 +457,11 @@ function display() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.CULL_FACE);
 	gl.disable(gl.STENCIL_TEST);
-	
+
+	//update perspective matrix(ordinary version)
+	var d = 100/Math.sqrt(3);
+	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000);
+
 	
 	drawObjects(identity(), identity(), true, false, true);
 	gl.enable(gl.STENCIL_TEST);
@@ -479,7 +483,16 @@ function display() {
 		}
 		
 	}
-	if(!mirror_matrix){console.log("bad things are happening");}
+	//update perspective matrix	(oblique version)
+	// counter++;
+	// if(counter > 10){
+		// console.log(getMirrorPlane(mirror_matrix));
+		// counter = 0;
+	// }
+	var d = 100/Math.sqrt(3);
+	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000, getMirrorPlane(mirror_matrix));
+
+	
 //	console.log(reflectMirror(mirror_matrix));
 	drawObjects(reflectMirror(mirror_matrix), identity(), true, true, false);
 //	drawObjects([-1, 0, 0, 0,
@@ -493,7 +506,30 @@ function display() {
 	window.requestAnimationFrame(display);
 }
 
+function getMirrorPlane(mirror_matrix){
+	var normal_matrix = transpose(invert(mirror_matrix.forwards));	
+	var transformed_normal = mult( 
+								[	0, 1, 0, 0, 
+									0, 0, 0, 0,
+									0, 0, 0, 0,
+									0, 0, 0, 0, ], normal_matrix);	
 
+	transformed_normal = {
+		x: transformed_normal[0],
+		y: transformed_normal[1],
+		z: transformed_normal[2]
+	};
+	transformed_normal = normalize(transformed_normal);
+	var mirror_pos = mult([	0,0,0,1,
+							0,0,0,0,
+							0,0,0,0,
+							0,0,0,0], mirror_matrix.forwards);
+	var d = -mirror_pos[0]*transformed_normal.x - mirror_pos[1]*transformed_normal.y - mirror_pos[2]*transformed_normal.z;
+	
+	transformed_normal.d = d;
+	return transformed_normal;
+	
+}
 
 function reflectMirror(mirror_matrix){
 	var normal_matrix = transpose(invert(mirror_matrix.forwards));	
@@ -509,11 +545,6 @@ function reflectMirror(mirror_matrix){
 		z: transformed_normal[2]
 	};
 	transformed_normal = normalize(transformed_normal);
-	counter++;
-	if(counter > 10){
-//		console.log(mirror_matrix);
-		counter = 0;
-	}
 	
 	var mirror_pos = mult([	0,0,0,1,
 							0,0,0,0,
