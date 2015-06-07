@@ -11,6 +11,7 @@ precision mediump float;
 
 uniform vec4 campos;
 uniform vec4 plane;
+uniform vec3 shark_color;
 
 varying vec3 normal;
 varying vec4 worldpos;
@@ -31,7 +32,7 @@ void main() {
 	
 	float ambient = 0.25;
 	
-	vec3 shark_color = vec3(0.5, 0.5, .75);
+//	vec3 shark_color = vec3(0.5, 0.5, .75);
 	
 	//lum = 0.0;
 	

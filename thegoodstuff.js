@@ -55,6 +55,8 @@ var ntrans_loc;
 var campos_loc;
 var plane_loc;
 
+var color_loc;
+
 var pview_loc;
 var pobj_loc;
 var pntrans_loc;
@@ -277,6 +279,7 @@ function init() {
 	obj_loc = gl.getUniformLocation(shark_prog, "transform");
 	campos_loc = gl.getUniformLocation(shark_prog, "campos");
 	plane_loc = gl.getUniformLocation(shark_prog, "plane");
+	color_loc = gl.getUniformLocation(shark_prog, "shark_color");
 	
 	//Normal transformation to use
 	ntrans_loc = gl.getUniformLocation(shark_prog, "normal_transform");
@@ -306,6 +309,7 @@ function initObjects(){
 		};
 	}*/
 	
+	var default_color = [0.5, 0.5, .75];
 	var box_rad = 100;
 	objects.push({
 			matrix: createObjectTransform([	{type: "s", x: 1000, y: 1000, z: 1000},
@@ -313,7 +317,8 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,
-			is_mirror: false
+			is_mirror: false,
+			color: default_color
 	});
 	objects.push({
 			matrix: createObjectTransform([	{type: "rx", r: Math.PI},
@@ -322,7 +327,8 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,
-			is_mirror: false
+			is_mirror: false,
+			color: default_color
 	});
 	objects.push({
 			matrix: createObjectTransform([	{type: "rx", r: -Math.PI/2},
@@ -331,7 +337,8 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,
-			is_mirror: false
+			is_mirror: false,
+			color: default_color
 	});
 	objects.push({
 			matrix: createObjectTransform([	{type: "rx", r: Math.PI/2},
@@ -340,7 +347,8 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,
-			is_mirror: false
+			is_mirror: false,
+			color: default_color
 	});
 	objects.push({
 			matrix: createObjectTransform([	{type: "rz", r: Math.PI/2},
@@ -349,7 +357,8 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,
-			is_mirror: false
+			is_mirror: false,
+			color: default_color
 	});
 	objects.push({
 			matrix: createObjectTransform([	{type: "rz", r: -Math.PI/2},
@@ -358,21 +367,29 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: true,
-			is_mirror: false
+			is_mirror: false,
+			color: default_color
 	});
 	
-	objects.push({
+	
+	
+	for(var i = 0; i < 3; i++){
+		objects.push({
 
-			matrix: createObjectTransform([	{type: "rx", r: -0.1},
-											{type: "ry", r: 0.1},
-											{type: "s", x: 20, y: 20, z: 20},
-											{type: "t", x: 0, y: 0, z:-10}]),
-			cast_shadows: true,
-			is_light: false,
-			is_floor: false,
-			is_mirror: false,
-			test: true
+				matrix: createObjectTransform([	{type: "rx", r: -0.1},
+												{type: "ry", r: 0.1},
+												{type: "s", x: 18+4*i, y: 18+4*i, z: 18+4*i},
+												{type: "t", x: 25*(i%2), y: 20*(i%2), z:-20*i}]),
+				cast_shadows: true,
+				is_light: false,
+				is_floor: false,
+				is_mirror: false,
+				test: true,
+				color: [0.1*i, 0.6*(i%2), 0.3*i]
 	});
+	}
+	
+/*	
 	objects.push({
 
 			matrix: createObjectTransform([	{type: "rx", r: -0.1},
@@ -397,7 +414,7 @@ function initObjects(){
 			is_mirror: false,
 			test: true
 	});
-
+*/
 	objects.push({
 		matrix: createObjectTransform([	{type: "rx", r: 0.1},
 										{type: "ry", r: -0.1},
@@ -408,7 +425,8 @@ function initObjects(){
 		cast_shadows: false,
 		is_floor: false,
 		is_mirror: false,
-		is_light: true
+		is_light: true,
+			color: default_color
 	});
 	
 	objects.push({
@@ -418,7 +436,8 @@ function initObjects(){
 			cast_shadows: true,
 			is_light: false,
 			is_floor: false,
-			is_mirror: true
+			is_mirror: true,
+			color: default_color
 	});
 		
 }
@@ -427,15 +446,6 @@ var test_light_pos = {x: 0, y: 0, z: 0};
 
 //Draws the scene
 function display() {
-	/*objects[1] = createObjectTransform([	{type: "ry", r: Math.PI/6},
-												{type: "t", x: 40, y:0, z:0},
-												{type: "rpz", x: 0, y: 50, z: 0, r: testval()*Math.PI*2}]);*/
-	/*var d = 100/Math.sqrt(3);
-	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI/3, 1, 1000);
-	gl.useProgram(shark_prog);
-	gl.uniformMatrix4fv(view_loc, false, perspective);
-	gl.useProgram(pick_prog);
-	gl.uniformMatrix4fv(pview_loc, false, perspective);*/
 	
 	//clear the entire framebuffer
 	gl.clearColor(0.1, 0.1, 0.4, 1.0);
@@ -473,11 +483,6 @@ function display() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.CULL_FACE);
 	gl.disable(gl.STENCIL_TEST);
-
-	//update perspective matrix(ordinary version)
-	/*var d = 100/Math.sqrt(3);
-	perspective = createPerspectiveTransform(d, d, d, -Math.atan(1/Math.sqrt(2)), Math.PI/4, 0, Math.PI*(1/2), 1, 1000);*/
-
 
 	var mirror_matrix;
 	//find mirror matrix
@@ -598,17 +603,7 @@ function reflectMirror(mirror_matrix){
 	
 	result = mult(mirror_inverse, result);
 	result = mult( result, mirror_translate);
-	
-	/*var result;
-	result = [-(a*a) + b*b + c*c, -2*a*b, -2*a*c, 0
-				-2*a*b, a*a-b*b+c*c, -2*b*c, 0,
-				-2*a*c, -2*b*c, a*a+b*b-c*c, 0,
-				0, 0, 0, 1];
-	result = scale(result, 1/(a*a+b*b+c*c));
-	result[15] = 1;
-	*/
-	
-//	console.log(result);
+
 	return result;
 }
 
@@ -626,6 +621,9 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 	}
 	
 	for (var i in objects) {
+		
+		
+		
 		//Set up transformation for the active object
 		//The object has a unique transform, and if the object is the one being manipulated, it is also affected by the current transform
 		var objtrans = objects[i].matrix.forwards;
@@ -706,6 +704,7 @@ function drawObjects(obj_mod, persp_mod, do_pick, inv_winding, draw_mirrors) {
 		gl.uniformMatrix4fv(obj_loc, false, objtrans);
 		gl.uniformMatrix4fv(view_loc, false, perspective);
 		gl.uniformMatrix4fv(ntrans_loc, false, transpose(invobjtrans));
+		gl.uniform3fv(color_loc, new Float32Array(objects[i].color));
 
 		if (objects[i].is_floor || objects[i].is_mirror) {
 			if (objects[i].is_mirror) {
