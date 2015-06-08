@@ -340,7 +340,7 @@ function check_status(id, req, set) {
 
 //Loads all shaders
 function loadShaders() {
-	/*
+	
 	var vertjs = document.createElement('script');
 	vertjs.type = 'text/javascript';
 	vertjs.src = "shark.vert.js";
@@ -355,7 +355,7 @@ function loadShaders() {
 			}
 		}
 		if (all_done) setup();
-	}
+	};
 	document.getElementsByTagName('head')[0].appendChild(vertjs);
 	
 	var fragjs = document.createElement('script');
@@ -372,7 +372,7 @@ function loadShaders() {
 			}
 		}
 		if (all_done) setup();
-	}
+	};
 	document.getElementsByTagName('head')[0].appendChild(fragjs);
 	
 	var pfragjs = document.createElement('script');
@@ -389,10 +389,78 @@ function loadShaders() {
 			}
 		}
 		if (all_done) setup();
-	}
-	document.getElementsByTagName('head')[0].appendChild(pfragjs);*/
+	};
+	document.getElementsByTagName('head')[0].appendChild(pfragjs);
 	
-	console.log("Don't forget to convert to JS at the end so we don't have Chrome fuckery!");
+	var vvertjs = document.createElement('script');
+	vvertjs.type = 'text/javascript';
+	vvertjs.src = "test_volume.vert.js";
+	vvertjs.onload = function() {
+		shader_status[3] = true;
+		volvert_src = vol_vert_src;
+		var all_done = true;
+		for (var i = 0; i < shader_status.length; ++i) {
+			if (!shader_status[i]) {
+				all_done = false;
+				break;
+			}
+		}
+		if (all_done) setup();
+	};
+	document.getElementsByTagName('head')[0].appendChild(vvertjs);
+	
+	var vfragjs = document.createElement('script');
+	vfragjs.type = 'text/javascript';
+	vfragjs.src = "test_volume.frag.js";
+	vfragjs.onload = function() {
+		shader_status[4] = true;
+		volfrag_src = vol_frag_src;
+		var all_done = true;
+		for (var i = 0; i < shader_status.length; ++i) {
+			if (!shader_status[i]) {
+				all_done = false;
+				break;
+			}
+		}
+		if (all_done) setup();
+	};
+	document.getElementsByTagName('head')[0].appendChild(vfragjs);
+	
+	var dvertjs = document.createElement('script');
+	dvertjs.type = 'text/javascript';
+	dvertjs.src = "darkener.vert.js";
+	dvertjs.onload = function() {
+		shader_status[5] = true;
+		darkvert_src = dark_vert_src;
+		var all_done = true;
+		for (var i = 0; i < shader_status.length; ++i) {
+			if (!shader_status[i]) {
+				all_done = false;
+				break;
+			}
+		}
+		if (all_done) setup();
+	};
+	document.getElementsByTagName('head')[0].appendChild(dvertjs);
+	
+	var dfragjs = document.createElement('script');
+	dfragjs.type = 'text/javascript';
+	dfragjs.src = "darkener.frag.js";
+	dfragjs.onload = function() {
+		shader_status[6] = true;
+		darkfrag_src = dark_frag_src;
+		var all_done = true;
+		for (var i = 0; i < shader_status.length; ++i) {
+			if (!shader_status[i]) {
+				all_done = false;
+				break;
+			}
+		}
+		if (all_done) setup();
+	};
+	document.getElementsByTagName('head')[0].appendChild(dfragjs);
+	
+	/*console.log("Don't forget to convert to JS at the end so we don't have Chrome fuckery!");
 	
 	var new_request;
 	if (window.XMLHttpRequest) {
@@ -450,7 +518,7 @@ function loadShaders() {
 		
 	} catch (e) {
 		alert("It looks like you might be using Chrome. For various reasons, Chrome is broke as shit at certain AJAX-related things. In order to run this, restart Chrome with the\n --disable-web-security flag and try again, or load it from a (possible local) web server. Or even better, run it in Firefox.");
-	}
+	}*/
 }
 
 //Creates a program given the shader source
